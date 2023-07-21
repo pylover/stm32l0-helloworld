@@ -1,0 +1,3 @@
+- UART
+- Watchdog
+- Deep Sleep

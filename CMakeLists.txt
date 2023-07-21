@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.20)
 project(foo)
 enable_language(ASM)
 
+set(FAMILY "stm32l0")
 set(CHIP "stm32l071cztx")
 set(ROLLUP "${PROJECT_SOURCE_DIR}/rollup")
 
@@ -12,6 +13,10 @@ add_executable(${CMAKE_PROJECT_NAME}
     ${ROLLUP}/sysmem.c
     main.c
 )
+include_directories(
+    ${PROJECT_SOURCE_DIR}/cmsis/core/include
+    ${PROJECT_SOURCE_DIR}/cmsis/${FAMILY}xx/include
+)
 add_custom_command(
     TARGET ${CMAKE_PROJECT_NAME} 
     POST_BUILD COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${CMAKE_PROJECT_NAME}>
@@ -20,10 +25,14 @@ add_custom_command(
 # set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mcpu=Cortex-M0plus")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O2")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DDEBUG -g3 -O2")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSTM32 -DSTM32L0")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSTM32L071xx")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSTM32L071CZTx")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu11")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -mthumb-interwork")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --specs=nano.specs")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-usage")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror")
 
 set(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp")
