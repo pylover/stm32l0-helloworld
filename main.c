@@ -9,6 +9,11 @@
 
 int
 main(void) {
-
 	  printf("fooooooo\n");
+	  printf("fooooooo\n");
+	  printf("fooooooo\n");
+	  printf("fooooooo\n");
+	  printf("fooooooo\n");
+	  printf("fooooooo\n");
+      while (1);
 }
