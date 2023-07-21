@@ -51,8 +51,8 @@ Reboot the system, then:
 #### Build & Debug
 
 ```bash
-mkdir -p build && cd build
-cmake -DCMAKE_TOOLCHAIN_FILE=../crosstool.cmake ..
+./rollup.sh
+cd build
 make clean all
 make flash
 ```

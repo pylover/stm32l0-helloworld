@@ -10,6 +10,9 @@
 int
 main(void) {
     int i;
+
+    printf("Starting...\n");
+
     for (i = 0; i < 5; i++) {
 	  printf("foo: %d\n", i);
     }
