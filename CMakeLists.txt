@@ -46,7 +46,8 @@ add_custom_target(flash
 
 
 add_custom_target(openocd
-    COMMAND openocd -f ../openocd.cfg
+    COMMAND openocd -f ../openocd.cfg 
+    -c \"program ${CMAKE_PROJECT_NAME}.elf verify reset\"
 )
 
 
