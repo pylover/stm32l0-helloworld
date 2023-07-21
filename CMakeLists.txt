@@ -9,7 +9,6 @@ set(ROLLUP "${PROJECT_SOURCE_DIR}/rollup")
 
 add_executable(${CMAKE_PROJECT_NAME}
     ${ROLLUP}/stm32l071cztx.s
-    ${ROLLUP}/syscalls.c
     ${ROLLUP}/sysmem.c
     main.c
 )
@@ -31,7 +30,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSTM32L071xx")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSTM32L071CZTx")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu11")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -mthumb-interwork")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --specs=nano.specs")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-usage")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror")
 
@@ -39,7 +37,7 @@ set(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp")
 
 set(LINKER_SCRIPT "${ROLLUP}/${CHIP}_flash.ld")
 set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T${LINKER_SCRIPT}")
-set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --specs=nosys.specs")
+set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lrdimon --specs=rdimon.specs")
 set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Map=test.map")
 set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--gc-sections")
 set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
@@ -67,6 +65,7 @@ add_custom_target(openocd
 
 add_custom_target(gdb
     COMMAND arm-none-eabi-gdb -q
+    --init-command=${ROLLUP}/.gdbinit
     --command=${ROLLUP}/gdbinit
     ${CMAKE_PROJECT_NAME}.elf
 )

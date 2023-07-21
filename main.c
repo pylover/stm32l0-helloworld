@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
+extern void initialise_monitor_handles(void);
+
 #include <stm32l0xx.h>
 
 
@@ -26,6 +28,7 @@ RCC_CRS_IRQHandler(void) {
 
 int
 main(void) {
+    initialise_monitor_handles();
     printf("Starting...\n");
 
     while (1);

@@ -1,1 +1,2 @@
-https://www.codeinsideout.com/blog/stm32/blink/#step-3-integrate-cmsis-pack
+https://www.codeinsideout.com/blog/stm32/blink/
+https://www.codeinsideout.com/blog/stm32/semihosting/
