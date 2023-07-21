@@ -64,7 +64,7 @@ First, start `OpenOCD` server:
 make openocd
 ```
 
-Then,
+Then, run `make gdb` in another terminal.
 
 ```bash
 make gdb
