@@ -21,19 +21,22 @@ sudo ldconfig
 
 ##### STlink v2 firmware version
 
-Update your programmer firmware using `CubeProgrammer`
+Update your programmer firmware using `CubeProgrammer` if required:
 
 ```
+st-info --probe
 Found 1 stlink programmers
   version:    V2J42S7
   serial:     030030000800003550334D4E
-  flash:      0 (pagesize: 0)
-  sram:       0
-  chipid:     0x000
-  dev-type:   unknown
+  flash:      196608 (pagesize: 128)
+  sram:       20480
+  chipid:     0x447
+  dev-type:   STM32L0xxx_Cat_5
 ```
 
 #### Toolchain
+
+Install the latest ARM toolchain.
 
 ```bash
 ./scripts/install-toolchain.sh
@@ -44,9 +47,21 @@ Reboot the system, then:
 #### Build & Debug
 
 ```bash
-mkdir build && cd build
+mkdir -p build && cd build
 cmake -DCMAKE_TOOLCHAIN_FILE=../crosstool.cmake ..
 make clean all
 make flash
-make openocd & make gdb
+```
+
+##### On-chip debug using GDB
+
+First, start `OpenOCD` server:
+```bash
+make openocd
+```
+
+Then,
+
+```bash
+make gdb
 ```
