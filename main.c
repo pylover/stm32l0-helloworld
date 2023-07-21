@@ -9,11 +9,9 @@
 
 int
 main(void) {
-	  printf("fooooooo\n");
-	  printf("fooooooo\n");
-	  printf("fooooooo\n");
-	  printf("fooooooo\n");
-	  printf("fooooooo\n");
-	  printf("fooooooo\n");
-      while (1);
+    int i;
+    for (i = 0; i < 5; i++) {
+	  printf("foo: %d\n", i);
+    }
+    while (1);
 }
