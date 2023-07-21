@@ -57,6 +57,12 @@ make clean all
 make flash
 ```
 
+##### Analize *.elf file
+
+```bash
+arm-none-eabi-size -tA foo.elf
+```
+
 ##### On-chip debug using GDB
 
 First, start `OpenOCD` server:
