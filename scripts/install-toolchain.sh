@@ -1,9 +1,11 @@
 #! /usr/bin/env bash
 
 
-# VER=12.2.MPACBTI-Rel1
-INDEX_URL=https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
-VER=$(curl -s ${INDEX_URL} | grep -Po '<h4>Version \K.+(?=</h4>)')
+VER=12.2.MPACBTI-Rel1
+
+# Uncomment it when upgrading to latest ARM toolchain.
+# INDEX_URL=https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
+# VER=$(curl -s ${INDEX_URL} | grep -Po '<h4>Version \K.+(?=</h4>)')
 
 
 TAR=arm-gnu-toolchain-${VER}-x86_64-arm-none-eabi.tar.xz

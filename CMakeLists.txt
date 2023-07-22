@@ -64,8 +64,13 @@ add_custom_target(openocd
 
 
 add_custom_target(gdb
-    COMMAND arm-none-eabi-gdb -q
+    COMMAND ${TOOLCHAIN_PREFIX}gdb -q
     --init-command=${ROLLUP}/.gdbinit
     --command=${ROLLUP}/gdbinit
     ${CMAKE_PROJECT_NAME}.elf
+)
+
+
+add_custom_target(analyze
+    COMMAND ${CMAKE_SIZE} -tA ${CMAKE_PROJECT_NAME}.elf
 )

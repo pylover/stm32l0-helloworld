@@ -31,14 +31,16 @@ main(void) {
     initialise_monitor_handles();
     printf("Starting...\n");
 
+    printf("Foo bar baz...\n");
+
     while (1);
-    // NVIC_EnableIRQ(RCC_CRS_IRQn);
-    // NVIC_SetPriority(RCC_CRS_IRQn,0);
-    // RCC->CIER |= RCC_CIER_HSERDYIE;
-    // RCC->CR |= RCC_CR_CSSHSEON | RCC_CR_HSEBYP | RCC_CR_HSEON;
-    // RCC->CR |= RCC_CR_HSERDY;
-    // /* turn on clock on GPIOA */
-    // RCC->AHBENR |= RCC_AHBENR_CRCEN;
+    NVIC_EnableIRQ(RCC_CRS_IRQn);
+    NVIC_SetPriority(RCC_CRS_IRQn,0);
+    RCC->CIER |= RCC_CIER_HSERDYIE;
+    RCC->CR |= RCC_CR_CSSHSEON | RCC_CR_HSEBYP | RCC_CR_HSEON;
+    RCC->CR |= RCC_CR_HSERDY;
+    /* turn on clock on GPIOA */
+    RCC->AHBENR |= RCC_AHBENR_CRCEN;
 
     // /* set PA5 to output mode */
     // GPIOA->MODER &= ~GPIO_MODER_MODE5_1;

@@ -9,6 +9,7 @@ script: `tm32l0xxx_flash.ld` for other devices.
 ```bash
 sudo apt-get install \
   libncurses-dev \
+  libusb-dev \
   openocd
 ```
 
@@ -60,7 +61,7 @@ make flash
 ##### Analize *.elf file
 
 ```bash
-arm-none-eabi-size -tA foo.elf
+make analyze
 ```
 
 ##### On-chip debug using GDB
