@@ -8,8 +8,8 @@ set(CHIP "stm32l071cztx")
 set(ROLLUP "${PROJECT_SOURCE_DIR}/rollup")
 
 add_executable(${CMAKE_PROJECT_NAME}
-    ${ROLLUP}/stm32l071cztx.s
-    ${ROLLUP}/sysmem.c
+    ${ROLLUP}/stm32l0xx.s
+    cmsis/stm32l0xx/system_stm32l0xx.c
     main.c
 )
 include_directories(
@@ -21,7 +21,7 @@ add_custom_command(
     POST_BUILD COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${CMAKE_PROJECT_NAME}>
 )
 
-# set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mcpu=Cortex-M0plus")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DDEBUG -g3 -O2")
@@ -36,30 +36,34 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror")
 set(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp")
 
 set(LINKER_SCRIPT "${ROLLUP}/${CHIP}_flash.ld")
-set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T${LINKER_SCRIPT}")
-set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lrdimon --specs=rdimon.specs")
-set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Map=test.map")
-set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--gc-sections")
-set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
-set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--start-group")
-set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lc -lm")
-set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--end-group")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T${LINKER_SCRIPT}")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lrdimon --specs=rdimon.specs")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Map=test.map")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--gc-sections")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--start-group")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lc -lm")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--end-group")
 
-set (CMAKE_EXECUTABLE_SUFFIX ".elf")
-set (CMAKE_STATIC_LIBRARY_SUFFIX ".a")
+set(CMAKE_EXECUTABLE_SUFFIX ".elf")
+set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
+
+
+set(OPENOCD_FLAGS ${OPENOCD_FLAGS} --search ${ROLLUP})
+set(OPENOCD_FLAGS ${OPENOCD_FLAGS} --file ${ROLLUP}/openocd.cfg)
 
 
 add_custom_target(flash
-    DEPENDS ${CMAKE_PROJECT_NAME}
-    COMMAND openocd -f ${ROLLUP}/openocd.cfg 
+    COMMAND openocd ${OPENOCD_FLAGS}
     -c \"program ${CMAKE_PROJECT_NAME}.elf verify reset exit\"
+    DEPENDS ${CMAKE_PROJECT_NAME}
 )
 
 
 add_custom_target(openocd
-    DEPENDS ${CMAKE_PROJECT_NAME}
-    COMMAND openocd -f ${ROLLUP}/openocd.cfg 
+    COMMAND openocd ${OPENOCD_FLAGS}
     -c \"program ${CMAKE_PROJECT_NAME}.elf verify reset\"
+    DEPENDS ${CMAKE_PROJECT_NAME}
 )
 
 

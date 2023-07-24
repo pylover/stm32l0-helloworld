@@ -58,7 +58,7 @@ Reset_Handler:
   ldr   r0, =_estack
   mov   sp, r0          /* set stack pointer */
 /* Call the clock system initialization function.*/
-  bl  SystemInit
+  bl  system_init
 
 /* Copy the data segment initializers from flash to SRAM */
   ldr r0, =_sdata
@@ -278,6 +278,6 @@ g_pfnVectors:
 	.weak	AES_RNG_LPUART1_IRQHandler
 	.thumb_set AES_RNG_LPUART1_IRQHandler,Default_Handler
 
-	.weak	SystemInit
+	.weak	system_init
 
 /************************ (C) COPYRIGHT STMicroelectonics *****END OF FILE****/

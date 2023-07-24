@@ -1,3 +1,4 @@
+- Clock
 - UART
 - Watchdog
 - Deep Sleep
