@@ -52,6 +52,8 @@ uart_init() {
 void
 clock_init() {
     printf("Clock: %lu\n", SystemCoreClock);
+    SystemCoreClockUpdate();
+    printf("Clock: %lu\n", SystemCoreClock);
 }
 
 
