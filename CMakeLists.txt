@@ -104,7 +104,7 @@ add_custom_target(lint
 
 # OpenOCD options
 set(OPENOCD_FLAGS 
-    --file ${PROJECT_SOURCE_DIR}/openocd.cfg
+    --file ${PROJECT_SOURCE_DIR}/.openocd.cfg
     --file ${PROJECT_SOURCE_DIR}/${STM_FAMILY}/${STM_TYPE}_openocd.cfg
     --debug=1
 )
