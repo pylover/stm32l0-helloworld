@@ -12,7 +12,7 @@ set(OUTFILE "${CMAKE_PROJECT_NAME}.elf")
 
 # Verbosity
 set(CMAKE_RULE_MESSAGES OFF)
-set(CMAKE_VERBOSE_MAKEFILE OFF)
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 
 # Compiler options
@@ -21,13 +21,16 @@ add_compile_options(
     -DDEBUG 
     -g3 
     -O2
-    -DSTM32 -DSTM32L0
+    -DSTM32 
+    -DSTM32L0
     -DSTM32L071xx
     -DSTM32L071CZTx
     -std=gnu11
-    -mthumb -mthumb-interwork
+    -mthumb 
+    -mthumb-interwork
     -fstack-usage
-    -Wall -Werror
+    -Wall 
+    -Werror
 )
 include_directories(
     ${PROJECT_SOURCE_DIR}/cmsis
@@ -43,12 +46,14 @@ set(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp")
 # Linker options
 add_link_options(
     -T${LINKER_SCRIPT}
-    -lrdimon --specs=rdimon.specs
+    -lrdimon 
+    --specs=rdimon.specs
     -Wl,-Map=test.map
     -Wl,--gc-sections
     -static
     -Wl,--start-group
-    -lc -lm
+    -lc 
+    -lm
     -Wl,--end-group
 )
 set(CMAKE_EXECUTABLE_SUFFIX ".elf")
@@ -99,7 +104,7 @@ add_custom_target(lint
 set(OPENOCD_FLAGS 
     --search ${ROLLUP}
     --file ${ROLLUP}/openocd.cfg
-    --debug=1
+    --debug=2
 )
 
 
@@ -113,19 +118,20 @@ add_custom_target(flash
 
 # Debug
 add_custom_target(openocd
-    COMMAND openocd ${OPENOCD_FLAGS}
-    -c \"program ${OUT_FILE} verify reset\"
+    COMMAND openocd ${OPENOCD_FLAGS} 
+    -c \"program ${OUTFILE} verify reset\"
     DEPENDS ${CMAKE_PROJECT_NAME}
 )
 add_custom_target(gdb
-    COMMAND ${TOOLCHAIN_PREFIX}gdb -q
+    COMMAND ${TOOLCHAIN_PREFIX}gdb 
+    -q
     --init-command=${ROLLUP}/.gdbinit
     --command=${ROLLUP}/gdbinit
-    ${OUT_FILE}
+    ${OUTFILE}
 )
 
 
 # Analyze ELF file
-add_custom_target(elfread COMMAND readelf -l ${OUT_FILE})
-add_custom_target(elfsize COMMAND ${CMAKE_SIZE} -tA ${OUT_FILE})
+add_custom_target(elfread COMMAND readelf -l ${OUTFILE})
+add_custom_target(elfsize COMMAND ${CMAKE_SIZE} -tA ${OUTFILE})
 add_custom_target(analyze DEPENDS elfsize elfread)
