@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdint.h>
 
+
 /* Semihosting debug */
 extern void initialise_monitor_handles(void);
+
 
 #include "stm32l0xx.h"
 

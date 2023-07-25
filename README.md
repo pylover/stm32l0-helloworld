@@ -77,3 +77,11 @@ Then, run `make gdb` in another terminal.
 ```bash
 make gdb
 ```
+
+#### Lint
+
+```bash
+pip install prettyc
+cd build
+make lint
+```

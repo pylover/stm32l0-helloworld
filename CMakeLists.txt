@@ -53,6 +53,25 @@ set(OPENOCD_FLAGS ${OPENOCD_FLAGS} --search ${ROLLUP})
 set(OPENOCD_FLAGS ${OPENOCD_FLAGS} --file ${ROLLUP}/openocd.cfg)
 
 
+# Lint
+set(PRETTYC_FLAGS
+    --recursive
+    --verbose=0
+    --repository=.
+    --extensions=c,h,in
+    --linelength=80
+    --headers=h,in
+    --includeorder=standardcfirst
+    --root=.
+    #--quiet
+    ${PROJECT_SOURCE_DIR}
+)
+add_custom_target(lint
+    COMMAND prettyc
+    ${PRETTYC_FLAGS}
+)
+
+
 add_custom_target(flash
     COMMAND openocd ${OPENOCD_FLAGS}
     -c \"program ${CMAKE_PROJECT_NAME}.elf verify reset exit\"
