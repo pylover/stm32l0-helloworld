@@ -53,7 +53,7 @@ Reboot the system, then:
 #### Build & Debug
 
 ```bash
-./rollup.sh
+./scripts/rollup.sh
 cd build
 make clean all
 make flash
@@ -62,6 +62,10 @@ make flash
 ##### Analize *.elf file
 
 ```bash
+make elfread
+make elfsize
+
+# Run both above commands.
 make analyze
 ```
 

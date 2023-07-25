@@ -113,13 +113,13 @@ add_custom_target(gdb
 )
 
 
-add_custom_target(readelf
+add_custom_target(elfread
     COMMAND readelf 
     -l ${CMAKE_PROJECT_NAME}.elf
 )
-add_custom_target(size
+add_custom_target(elfsize
     COMMAND ${CMAKE_SIZE} 
     -tA ${CMAKE_PROJECT_NAME}.elf
 )
 add_custom_target(analyze 
-    DEPENDS size readelf)
+    DEPENDS elfsize elfread)
