@@ -3,10 +3,10 @@ cmake_minimum_required(VERSION 3.20)
 
 # Project 
 project(foo)
-set(FAMILY "stm32l0xx")
-set(CHIP "stm32l071cztx")
-set(ROLLUP "${PROJECT_SOURCE_DIR}/rollup")
-set(LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/${FAMILY}/${CHIP}_flash.ld")
+set(STM_FAMILY "stm32")
+set(STM_TYPE "stm32l0xx")
+set(STM_CHIP "stm32l071cztx")
+set(LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/${STM_FAMILY}/${STM_CHIP}_flash.ld")
 set(OUTFILE "${CMAKE_PROJECT_NAME}.elf")
 
 
@@ -16,7 +16,6 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 
 # Compiler options
-# add_compile_options(
 set(CFLAGS
     -mcpu=Cortex-M0plus
     -DDEBUG 
@@ -36,7 +35,7 @@ set(CFLAGS
 add_compile_options(${CFLAGS})
 include_directories(
     ${PROJECT_SOURCE_DIR}/cmsis
-    ${PROJECT_SOURCE_DIR}/${FAMILY}
+    ${PROJECT_SOURCE_DIR}/${STM_FAMILY}
 )
 
 
@@ -65,8 +64,8 @@ set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
 
 # Output binary
 add_executable(${CMAKE_PROJECT_NAME}
-    ${FAMILY}/${FAMILY}.s
-    ${FAMILY}/system_${FAMILY}.c
+    ${STM_FAMILY}/${STM_TYPE}.s
+    ${STM_FAMILY}/${STM_TYPE}_system.c
     main.c
 )
 target_link_options(${CMAKE_PROJECT_NAME}
@@ -94,7 +93,7 @@ set(PRETTYC_FLAGS
     --root=.
     --exclude=../build
     --exclude=../cmsis
-    --exclude=../stm32l0xx
+    --exclude=../stm32
     ${PROJECT_SOURCE_DIR}
 )
 add_custom_target(lint
@@ -105,9 +104,9 @@ add_custom_target(lint
 
 # OpenOCD options
 set(OPENOCD_FLAGS 
-    --search ${ROLLUP}
-    --file ${ROLLUP}/openocd.cfg
-    --debug=2
+    --file ${PROJECT_SOURCE_DIR}/openocd.cfg
+    --file ${PROJECT_SOURCE_DIR}/${STM_FAMILY}/${STM_TYPE}_openocd.cfg
+    --debug=1
 )
 
 
@@ -128,8 +127,9 @@ add_custom_target(openocd
 add_custom_target(gdb
     COMMAND ${TOOLCHAIN_PREFIX}gdb 
     -q
-    --init-command=${ROLLUP}/.gdbinit
-    --command=${ROLLUP}/gdbinit
+    --init-eval-command='target extended-remote :3333'
+    --init-eval-command='monitor arm semihosting enable'
+    --command=${PROJECT_SOURCE_DIR}/gdbinit
     ${OUTFILE}
 )
 
