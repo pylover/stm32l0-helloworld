@@ -3,18 +3,18 @@ cmake_minimum_required(VERSION 3.20)
 project(foo)
 enable_language(ASM)
 
-set(FAMILY "stm32l0")
+set(FAMILY "stm32l0xx")
 set(CHIP "stm32l071cztx")
 set(ROLLUP "${PROJECT_SOURCE_DIR}/rollup")
 
 add_executable(${CMAKE_PROJECT_NAME}
-    ${ROLLUP}/stm32l0xx.s
-    cmsis/stm32l0xx/system_stm32l0xx.c
+    ${FAMILY}/${FAMILY}.s
+    ${FAMILY}/system_${FAMILY}.c
     main.c
 )
 include_directories(
-    ${PROJECT_SOURCE_DIR}/cmsis/core/include
-    ${PROJECT_SOURCE_DIR}/cmsis/${FAMILY}xx/include
+    ${PROJECT_SOURCE_DIR}/cmsis
+    ${PROJECT_SOURCE_DIR}/${FAMILY}
 )
 add_custom_command(
     TARGET ${CMAKE_PROJECT_NAME} 
@@ -35,7 +35,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror")
 
 set(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp")
 
-set(LINKER_SCRIPT "${ROLLUP}/${CHIP}_flash.ld")
+set(LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/${FAMILY}/${CHIP}_flash.ld")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T${LINKER_SCRIPT}")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lrdimon --specs=rdimon.specs")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Map=test.map")

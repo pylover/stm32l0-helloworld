@@ -200,7 +200,7 @@ void SystemCoreClockUpdate (void)
 {
   uint32_t tmp = 0U, pllmul = 0U, plldiv = 0U, pllsource = 0U, msirange = 0U;
 
-  /* Get SYSCLK source -------------------------------------------------------*/
+  /* Get SYSCLK source ----------------------------------------------------*/
   tmp = RCC->CFGR & RCC_CFGR_SWS;
 
   switch (tmp)
@@ -223,7 +223,7 @@ void SystemCoreClockUpdate (void)
       SystemCoreClock = HSE_VALUE;
       break;
     default:  /* PLL used as system clock */
-      /* Get PLL clock source and multiplication factor ----------------------*/
+      /* Get PLL clock source and multiplication factor -------------------*/
       pllmul = RCC->CFGR & RCC_CFGR_PLLMUL;
       plldiv = RCC->CFGR & RCC_CFGR_PLLDIV;
       pllmul = PLLMulTable[(pllmul >> RCC_CFGR_PLLMUL_Pos)];
