@@ -113,6 +113,7 @@ add_custom_target(gdb
 )
 
 
+# Analyze
 add_custom_target(elfread
     COMMAND readelf 
     -l ${CMAKE_PROJECT_NAME}.elf
