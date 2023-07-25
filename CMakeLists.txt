@@ -12,11 +12,12 @@ set(OUTFILE "${CMAKE_PROJECT_NAME}.elf")
 
 # Verbosity
 set(CMAKE_RULE_MESSAGES OFF)
-set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 
 # Compiler options
-add_compile_options(
+# add_compile_options(
+set(CFLAGS
     -mcpu=Cortex-M0plus
     -DDEBUG 
     -g3 
@@ -32,6 +33,7 @@ add_compile_options(
     -Wall 
     -Werror
 )
+add_compile_options(${CFLAGS})
 include_directories(
     ${PROJECT_SOURCE_DIR}/cmsis
     ${PROJECT_SOURCE_DIR}/${FAMILY}
@@ -45,10 +47,11 @@ set(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp")
 
 # Linker options
 add_link_options(
+    ${CFLAGS}
     -T${LINKER_SCRIPT}
     -lrdimon 
     --specs=rdimon.specs
-    -Wl,-Map=test.map
+    -Wl,-Map=${CMAKE_PROJECT_NAME}.map
     -Wl,--gc-sections
     -static
     -Wl,--start-group

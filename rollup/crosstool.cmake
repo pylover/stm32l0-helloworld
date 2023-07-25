@@ -5,7 +5,6 @@ set (CMAKE_CROSSCOMPILING True)
 # Skip link step during toolchain validation.
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-
 set(TOOLCHAIN_PREFIX   "arm-none-eabi-")
 set(CMAKE_C_COMPILER   "${TOOLCHAIN_PREFIX}gcc")
 set(CMAKE_ASM_COMPILER "${TOOLCHAIN_PREFIX}gcc")
