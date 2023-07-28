@@ -34,6 +34,7 @@ set(CFLAGS
 )
 add_compile_options(${CFLAGS})
 include_directories(
+    ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/cmsis
     ${PROJECT_SOURCE_DIR}/${STM_FAMILY}
 )

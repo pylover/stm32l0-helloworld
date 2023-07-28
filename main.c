@@ -23,7 +23,6 @@
 /* Semihosting debug */
 extern void initialise_monitor_handles(void);
 
-
 #include "stm32l0xx.h"
 
 
@@ -64,9 +63,6 @@ RCC_CRS_IRQHandler(void) {
 */
 static __INLINE void
 clock_init() {
-    system_clock_update();
-    printf("Clock before hse: %luHz\n", system_clock);
-
     /* Enable high periority interrupt on RCC */
     NVIC_EnableIRQ(RCC_CRS_IRQn);
     NVIC_SetPriority(RCC_CRS_IRQn, 0);
