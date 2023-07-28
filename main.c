@@ -40,15 +40,21 @@ extern void initialise_monitor_handles(void);
 
 void
 RCC_CRS_IRQHandler(void) {
+    /* Check if HSE is ready */
     if ((RCC->CR & RCC_CR_HSERDY) == 0) {
         printf("HSE is not ready ready\n");
         return;
     }
 
+    /* Clear the HSE ready interrupt */
     RCC->CICR |= RCC_CICR_HSERDYC;
+
+    /* Switch SYSCLK to HSE source */
     RCC->CFGR |= RCC_CFGR_SW_HSE;
-    SystemCoreClockUpdate();
-    printf("HSE Clock: %luHz\n", SystemCoreClock);
+
+    /* Update system clock variable */
+    system_clock_update();
+    printf("HSE Clock: %luHz\n", system_clock);
 }
 
 
@@ -58,8 +64,8 @@ RCC_CRS_IRQHandler(void) {
 */
 static __INLINE void
 clock_init() {
-    SystemCoreClockUpdate();
-    printf("Clock before hse: %luHz\n", SystemCoreClock);
+    system_clock_update();
+    printf("Clock before hse: %luHz\n", system_clock);
 
     /* Enable high periority interrupt on RCC */
     NVIC_EnableIRQ(RCC_CRS_IRQn);
@@ -68,11 +74,11 @@ clock_init() {
     /* Enable interrupt on HSE becomes ready */
     RCC->CIER |= RCC_CIER_HSERDYIE;
 
-    /* Enable HSE with security */
-    RCC->CR |= RCC_CR_HSEON;
+    /* Disable PLL */
+    RCC->CR &= RCC->CR & (~RCC_CR_PLLON);
 
-    // // SYSCLK
-    // // AHB, APB1, APB2
+    /* Enable HSE without security */
+    RCC->CR |= RCC_CR_HSEON;
 }
 
 
@@ -85,17 +91,6 @@ main(void) {
     // uart_init();
 
     printf("Starting...\n");
-
-    // NVIC_EnableIRQ(RCC_CRS_IRQn);
-    // NVIC_SetPriority(RCC_CRS_IRQn,0);
-    // RCC->CIER |= RCC_CIER_HSERDYIE;
-    // RCC->CR |= RCC_CR_HSERDY;
-    // /* turn on clock on GPIOA */
-    // RCC->AHBENR |= RCC_AHBENR_CRCEN;
-
-    // /* set PA5 to output mode */
-    // GPIOA->MODER &= ~GPIO_MODER_MODE5_1;
-    // GPIOA->MODER |=  GPIO_MODER_MODE5_0;
 
     // while(1) {
     //   /* set HIGH value on pin PA5 */

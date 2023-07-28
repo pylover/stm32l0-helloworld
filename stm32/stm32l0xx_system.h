@@ -52,10 +52,10 @@
       2) by calling HAL API function HAL_RCC_GetSysClockFreq()
       3) each time HAL_RCC_ClockConfig() is called to configure the system clock frequency
          Note: If you use this function to configure the system clock; then there
-               is no need to call the 2 first functions listed above, since SystemCoreClock
+               is no need to call the 2 first functions listed above, since system_clock
                variable is updated automatically.
   */
-extern uint32_t SystemCoreClock;          /*!< System Clock Frequency (Core Clock) */
+extern uint32_t system_clock;          /*!< System Clock Frequency (Core Clock) */
 /*
 */
 extern const uint8_t AHBPrescTable[16];   /*!< AHB prescalers table values */
@@ -88,7 +88,7 @@ extern const uint8_t PLLMulTable[9];      /*!< PLL multipiers table values */
   */
 
 extern void system_init(void);
-extern void SystemCoreClockUpdate(void);
+extern void system_clock_update(void);
 /**
   * @}
   */

@@ -6,3 +6,4 @@
 - UART
 - Watchdog
 - Deep Sleep
+- Lint stm32l0xx_system.c
