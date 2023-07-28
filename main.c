@@ -24,10 +24,6 @@
 #include "device.h"
 
 
-/* delay counter */
-#define DELAY_MAX       50
-
-
 int
 main(void) {
 #ifdef PROD
