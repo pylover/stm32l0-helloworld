@@ -3791,6 +3791,9 @@ typedef struct
 #define RCC_AHBENR_CRCEN_Pos             (12U)
 #define RCC_AHBENR_CRCEN_Msk             (0x1UL << RCC_AHBENR_CRCEN_Pos)        /*!< 0x00001000 */
 #define RCC_AHBENR_CRCEN                 RCC_AHBENR_CRCEN_Msk                  /*!< CRC clock enable */
+#define RCC_AHBENR_CRYPEN_Pos            (24U)
+#define RCC_AHBENR_CRYPEN_Msk            (0x1UL << RCC_AHBENR_CRYPEN_Pos)        /*!< 0x00001000 */
+#define RCC_AHBENR_CRYPEN                RCC_AHBENR_CRYPEN_Msk                  /*!< CRC clock enable */
 
 /* Reference defines */
 #define RCC_AHBENR_DMA1EN                   RCC_AHBENR_DMAEN              /*!< DMA1 clock enable */

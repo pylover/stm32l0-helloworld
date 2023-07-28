@@ -40,9 +40,10 @@ main(void) {
     // uart_init();
 
     INFO("Starting...");
+    int t = 0;
 
     while (1) {
         delay_s(5);
-        INFO("Ticks: %d", ticks_ms);
+        INFO("Ticks: %d", t++);
     }
 }
