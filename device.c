@@ -17,10 +17,11 @@
  *  Author: Vahid Mardani <vahid.mardani@gmail.com>
  */
 #include <stdio.h>
+#include "clog.h"
 #include "device.h"
 
 
-#ifdef DEBUG
+#ifndef PROD
 /* Semihosting debug */
 extern void initialise_monitor_handles(void);
 #endif
@@ -36,8 +37,18 @@ extern void initialise_monitor_handles(void);
 #endif
 
 
+/* Variable to store millisecond ticks */
+volatile uint32_t ticks_ms = 0;
 
-// TODO: rename it to lowercase
+
+void
+SysTick_Handler(void) {
+    if (ticks_ms) {
+        ticks_ms--;
+    }
+}
+
+
 void
 RCC_CRS_IRQHandler(void) {
     /* Check if HSE is ready */
@@ -54,7 +65,12 @@ RCC_CRS_IRQHandler(void) {
 
     /* Update system clock variable */
     system_clock_update();
-    printf("HSE Clock: %luHz\n", system_clock);
+    INFO("HSE Clock: %luHz\n", system_clock);
+
+    /* SysTick */
+    if (SysTick_Config(system_clock / SYSTICKS)) {
+        ERROR("SYSTICKS is too large");
+    }
 }
 
 
@@ -80,8 +96,23 @@ clock_init() {
 
 
 void
+delay_ms(uint32_t ms) {
+    ticks_ms = ms;
+    while (ticks_ms) {}
+}
+
+
+void
+delay_s(uint32_t s) {
+    while (s--) {
+        delay_ms(1000);
+    }
+}
+
+
+void
 device_init() {
-#ifdef DEBUG
+#ifndef PROD
     /* Semihosting debug */
     initialise_monitor_handles();
 #endif

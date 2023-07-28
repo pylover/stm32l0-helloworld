@@ -61,7 +61,7 @@
  */
 
 #include "cmsis_version.h"
- 
+
 /*  CMSIS CM0+ definitions */
 #define __CM0PLUS_CMSIS_VERSION_MAIN (__CM_CMSIS_VERSION_MAIN)                  /*!< \deprecated [31:16] CMSIS HAL main version */
 #define __CM0PLUS_CMSIS_VERSION_SUB  (__CM_CMSIS_VERSION_SUB)                   /*!< \deprecated [15:0]  CMSIS HAL sub version */
@@ -1046,7 +1046,8 @@ __STATIC_INLINE uint32_t SCB_GetFPUType(void)
 
 /**
   \brief   System Tick Configuration
-  \details Initializes the System Timer and its interrupt, and starts the System Tick Timer.
+  \details Initializes the System Timer and its interrupt, and starts the
+           System Tick Timer.
            Counter is in free running mode to generate periodic interrupts.
   \param [in]  ticks  Number of ticks between two interrupts.
   \return          0  Function succeeded.
@@ -1068,7 +1069,7 @@ __STATIC_INLINE uint32_t SysTick_Config(uint32_t ticks)
   SysTick->CTRL  = SysTick_CTRL_CLKSOURCE_Msk |
                    SysTick_CTRL_TICKINT_Msk   |
                    SysTick_CTRL_ENABLE_Msk;                         /* Enable SysTick IRQ and SysTick Timer */
-  return (0UL);                                                     /* Function successful */
+  return (0UL);
 }
 
 #endif

@@ -20,6 +20,7 @@
 #include <stdint.h>
 
 
+#include "clog.h"
 #include "device.h"
 
 
@@ -29,10 +30,19 @@
 
 int
 main(void) {
+#ifdef PROD
+    clog_verbosity = CLOG_SILENT;
+#else
+    clog_verbosity = CLOG_DEBUG;
+#endif
+
     device_init();
     // uart_init();
 
-    printf("Starting...\n");
+    INFO("Starting...");
 
-    while (1) {}
+    while (1) {
+        delay_s(5);
+        INFO("Ticks: %d", ticks_ms);
+    }
 }

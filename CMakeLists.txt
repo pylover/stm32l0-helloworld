@@ -15,11 +15,24 @@ set(CMAKE_RULE_MESSAGES OFF)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 
+# Production
+# Uncomment it for prodution
+#set(PROD "foo")
+
 # Compiler options
+if(DEFINED PROD)
+set(CFLAGS 
+    -DPROD 
+)
+else()
 set(CFLAGS
-    -mcpu=Cortex-M0plus
-    -DDEBUG 
     -g3 
+)
+endif()
+
+set(CFLAGS
+    ${CFLAGS}
+    -mcpu=Cortex-M0plus
     -O2
     -DSTM32 
     -DSTM32L0
@@ -64,7 +77,9 @@ set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
 
 
 # Output binary
+add_library(clog OBJECT clog.c)
 add_executable(${CMAKE_PROJECT_NAME}
+    $<TARGET_OBJECTS:clog>
     ${STM_FAMILY}/${STM_TYPE}.s
     ${STM_FAMILY}/${STM_TYPE}_system.c
     device.c
@@ -123,7 +138,7 @@ add_custom_target(flash
 # Debug
 add_custom_target(openocd
     COMMAND openocd ${OPENOCD_FLAGS} 
-    -c \"program ${OUTFILE} verify reset\"
+    -c \"program ${OUTFILE} reset\"
     DEPENDS ${CMAKE_PROJECT_NAME}
 )
 add_custom_target(gdb
