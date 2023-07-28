@@ -33,13 +33,12 @@ main(void) {
 #endif
 
     device_init();
-    // uart_init();
 
     INFO("Starting...");
     int t = 0;
 
     while (1) {
-        delay_s(5);
+        delay_s(2);
         INFO("Ticks: %d", t++);
     }
 }

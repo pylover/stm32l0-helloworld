@@ -88,13 +88,15 @@ clock_init() {
     RCC->CIER |= RCC_CIER_HSERDYIE;
 
     /* Disable PLL */
-    RCC->CR &= (uint32_t) (~RCC_CR_PLLON);
+    RCC->CR &= ~RCC_CR_PLLON;
 
     /* Enable HSE without security */
     RCC->CR |= RCC_CR_HSEON;
 
-    RCC->AHBENR &= (uint32_t) (~RCC_AHBENR_CRYPEN);
-    RCC->AHBENR &= (uint32_t) (~RCC_AHBENR_CRCEN);
+    /* AHB */
+    RCC->CFGR &= (~RCC_CFGR_HPRE_Msk) | RCC_CFGR_HPRE_DIV4;
+    RCC->AHBENR &= ~RCC_AHBENR_CRYPEN;
+    RCC->AHBENR &= ~RCC_AHBENR_CRCEN;
     RCC->AHBENR |= RCC_AHBENR_DMAEN;
 }
 
