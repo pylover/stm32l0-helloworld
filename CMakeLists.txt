@@ -17,7 +17,8 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 # Production
 # Uncomment it for prodution
-#set(PROD "foo")
+#set(PROD yes)
+
 
 # Compiler options
 if(DEFINED PROD)
@@ -29,7 +30,6 @@ set(CFLAGS
     -g3 
 )
 endif()
-
 set(CFLAGS
     ${CFLAGS}
     -mcpu=Cortex-M0plus

@@ -87,6 +87,56 @@ clog_hless(enum clog_verbosity level, bool newline,
 #define NEWLINE "\n"
 
 
+#ifdef PROD
+
+
+/* Variable arguments: format, ... */
+#define DEBUG(...)
+#define INFO(...)
+#define WARN(...)
+#define ERROR(...)
+#define FATAL(...)
+
+/* No newline appended */
+#define DEBUGN(...)
+#define INFON(...)
+#define WARNN(...)
+#define ERRORN(...)
+#define FATALN(...)
+
+/* Headerless */
+#define DEBUGH(...)
+#define INFOH(...)
+#define WARNH(...)
+#define ERRORH(...)
+#define FATALH(...)
+
+/* Headerless without trailing newline */
+#define DEBUGNH(...)
+#define INFONH(...)
+#define WARNNH(...)
+#define ERRORNH(...)
+#define FATALNH(...)
+
+/* va_list compatibility */
+#define DEBUGV(...)
+#define INFOV(...)
+#define WARNV(...)
+#define ERRORV(...)
+#define FATALV(...)
+
+#define DEBUGNV(...)
+#define INFONV(...)
+#define WARNNV(...)
+#define ERRORNV(...)
+#define FATALNV(...)
+
+
+/* Just prints into standard error */
+#define PRINTE(...)
+#else
+
+
 /* Variable arguments: format, ... */
 #define DEBUG(...)   LOG(CLOG_DEBUG,   true, __VA_ARGS__)
 #define INFO(...)    LOG(CLOG_INFO,    true, __VA_ARGS__)
@@ -132,5 +182,7 @@ clog_hless(enum clog_verbosity level, bool newline,
 /* Just prints into standard error */
 #define PRINTE(...)  dprintf(STDERR_FILENO, __VA_ARGS__)
 
+
+#endif  // ifdef prod
 
 #endif  // CLOG_H_
