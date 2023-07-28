@@ -16,7 +16,7 @@
  */
 
 
-#include "configuration.h"
+#include "device.h"
 #include "stm32l0xx.h"
 
 

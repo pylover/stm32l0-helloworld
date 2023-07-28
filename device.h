@@ -16,12 +16,16 @@
  *
  *  Author: Vahid Mardani <vahid.mardani@gmail.com>
  */
-#ifndef CONFIGURATION_H_
-#define CONFIGURATION_H_
+#ifndef DEVICE_H_
+#define DEVICE_H_
 
 
 /* Value of the external crystal oscillator in Hz */
 #define HSE_VALUE    ((uint32_t)12000000U)
 
 
-#endif  // CONFIGURATION_H_
+void
+device_init();
+
+
+#endif  // DEVICE_H_

@@ -27,7 +27,7 @@ sudo ldconfig
 
 ##### STlink v2 firmware version
 
-Update your programmer firmware using `CubeProgrammer` if required:
+Update your programmer's firmware using `CubeProgrammer` if required:
 
 ```
 st-info --probe
@@ -59,7 +59,7 @@ make clean all
 make flash
 ```
 
-##### Analize *.elf file
+##### Analyze *.elf file
 
 ```bash
 make elfread

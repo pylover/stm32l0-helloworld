@@ -67,6 +67,7 @@ set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
 add_executable(${CMAKE_PROJECT_NAME}
     ${STM_FAMILY}/${STM_TYPE}.s
     ${STM_FAMILY}/${STM_TYPE}_system.c
+    device.c
     main.c
 )
 target_link_options(${CMAKE_PROJECT_NAME}
