@@ -1,7 +1,5 @@
-+ Clock
 - PLL
 - HSE security CSSHSEON
-- What is arm __INLINE function?
 - UART
 - Watchdog
 - Deep Sleep
