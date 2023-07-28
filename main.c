@@ -20,8 +20,11 @@
 #include <stdint.h>
 
 
+#ifdef DEBUG
 /* Semihosting debug */
 extern void initialise_monitor_handles(void);
+#endif
+
 
 #include "stm32l0xx.h"
 
@@ -80,21 +83,15 @@ clock_init() {
 
 int
 main(void) {
+#ifdef DEBUG
     /* Semihosting debug */
     initialise_monitor_handles();
+#endif
 
     clock_init();
     // uart_init();
 
     printf("Starting...\n");
 
-    // while(1) {
-    //   /* set HIGH value on pin PA5 */
-    //   GPIOA->BSRR |= GPIO_BSRR_BS_5;
-    //   for(uint32_t i=DELAY_MAX; i--;) {}
-
-    //   /* set LOW value on pin PA5 */
-    //   GPIOA->BSRR |= GPIO_BSRR_BR_5;
-    //   for(uint32_t i=DELAY_MAX; i--;) {}
-    // }
+    while (1) {}
 }
