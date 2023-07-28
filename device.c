@@ -88,7 +88,7 @@ clock_init() {
     RCC->CIER |= RCC_CIER_HSERDYIE;
 
     /* Disable PLL */
-    RCC->CR &= RCC->CR & (~RCC_CR_PLLON);
+    RCC->CR &= (uint32_t)(~RCC_CR_PLLON);
 
     /* Enable HSE without security */
     RCC->CR |= RCC_CR_HSEON;

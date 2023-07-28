@@ -1,6 +1,5 @@
-- PLL
-- HSE security CSSHSEON
 - UART
 - Watchdog
 - Deep Sleep
 - Lint stm32l0xx_system.c
+- HSE security CSSHSEON
