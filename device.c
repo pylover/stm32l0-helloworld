@@ -62,7 +62,7 @@ RCC_CRS_IRQHandler(void) {
 * This function enables the interrupton HSE ready,
 * And start the HSE as external clock with crystal + security.
 */
-__STATIC_INLINE void
+inline static void
 clock_init() {
     /* Enable high periority interrupt on RCC */
     NVIC_EnableIRQ(RCC_CRS_IRQn);
