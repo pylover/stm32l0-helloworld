@@ -1,4 +1,4 @@
-- UART
+- UART & DMA: https://medium.com/@csrohit/working-with-usart-and-dma-in-stm32-arm-cortex-m3-6a0e8b3174f3
 - Watchdog
 - Deep Sleep
 - Lint stm32l0xx_system.c
