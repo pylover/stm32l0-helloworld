@@ -622,13 +622,13 @@ typedef struct
 #define DBGMCU              ((DBGMCU_TypeDef *) DBGMCU_BASE)
 
 #define DMA1                ((DMA_TypeDef *) DMA1_BASE)
-#define DMA1_Channel1       ((DMA_Channel_TypeDef *) DMA1_Channel1_BASE)
-#define DMA1_Channel2       ((DMA_Channel_TypeDef *) DMA1_Channel2_BASE)
-#define DMA1_Channel3       ((DMA_Channel_TypeDef *) DMA1_Channel3_BASE)
-#define DMA1_Channel4       ((DMA_Channel_TypeDef *) DMA1_Channel4_BASE)
-#define DMA1_Channel5       ((DMA_Channel_TypeDef *) DMA1_Channel5_BASE)
-#define DMA1_Channel6       ((DMA_Channel_TypeDef *) DMA1_Channel6_BASE)
-#define DMA1_Channel7       ((DMA_Channel_TypeDef *) DMA1_Channel7_BASE)
+#define DMA1_CH1            ((DMA_Channel_TypeDef *) DMA1_Channel1_BASE)
+#define DMA1_CH2            ((DMA_Channel_TypeDef *) DMA1_Channel2_BASE)
+#define DMA1_CH3            ((DMA_Channel_TypeDef *) DMA1_Channel3_BASE)
+#define DMA1_CH4            ((DMA_Channel_TypeDef *) DMA1_Channel4_BASE)
+#define DMA1_CH5            ((DMA_Channel_TypeDef *) DMA1_Channel5_BASE)
+#define DMA1_CH6            ((DMA_Channel_TypeDef *) DMA1_Channel6_BASE)
+#define DMA1_CH7            ((DMA_Channel_TypeDef *) DMA1_Channel7_BASE)
 #define DMA1_CSELR          ((DMA_Request_TypeDef *) DMA1_CSELR_BASE)
 
 
