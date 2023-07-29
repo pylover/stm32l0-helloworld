@@ -41,10 +41,6 @@ extern enum clog_verbosity clog_verbosity;
 extern const char * clog_verbosities[];
 
 
-enum clog_verbosity
-clog_verbosity_from_string(const char * verbosity);
-
-
 void
 clog_log(
         enum clog_verbosity level,

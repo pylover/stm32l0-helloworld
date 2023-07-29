@@ -5,3 +5,4 @@
 - HSE security CSSHSEON
 - Firewall
 - RCC_AHBENR, RCC_APB2ENR, RCC_APB1ENR and RCC_IOPENR
+- Remove clog from production build

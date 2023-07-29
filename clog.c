@@ -129,24 +129,3 @@ clog_vlog(
         exit(EXIT_FAILURE);
     }
 }
-
-
-enum clog_verbosity
-clog_verbosity_from_string(const char * verbosity) {
-    switch (verbosity[0]) {
-        case 's':
-            return CLOG_SILENT;
-        case 'f':
-            return CLOG_FATAL;
-        case 'e':
-            return CLOG_ERROR;
-        case 'w':
-            return CLOG_WARNING;
-        case 'i':
-            return CLOG_INFO;
-        case 'd':
-            return CLOG_DEBUG;
-        default:
-            return CLOG_UNKNOWN;
-    }
-}
