@@ -3,3 +3,5 @@
 - Deep Sleep
 - Lint stm32l0xx_system.c
 - HSE security CSSHSEON
+- Firewall
+- RCC_AHBENR, RCC_APB2ENR, RCC_APB1ENR and RCC_IOPENR

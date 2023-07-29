@@ -19,15 +19,13 @@
 #include <stdio.h>
 #include "clog.h"
 #include "device.h"
+#include "stm32l0xx.h"
 
 
 #ifndef PROD
 /* Semihosting debug */
 extern void initialise_monitor_handles(void);
 #endif
-
-
-#include "stm32l0xx.h"
 
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
