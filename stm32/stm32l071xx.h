@@ -274,9 +274,11 @@ typedef struct
   __IO uint32_t ODR;          /*!< GPIO port output data register,              Address offset: 0x14 */
   __IO uint32_t BSRR;         /*!< GPIO port bit set/reset registerBSRR,        Address offset: 0x18 */
   __IO uint32_t LCKR;         /*!< GPIO port configuration lock register,       Address offset: 0x1C */
-  __IO uint32_t AFR[2];       /*!< GPIO alternate function register,            Address offset: 0x20-0x24 */
+  __IO uint32_t AFRL;         /*!< GPIO alternate function register low,            Address offset: 0x20-0x24 */
+  __IO uint32_t AFRH;         /*!< GPIO alternate function register high,            Address offset: 0x20-0x24 */
+  // __IO uint32_t AFR[2];       /*!< GPIO alternate function register,            Address offset: 0x20-0x24 */
   __IO uint32_t BRR;          /*!< GPIO bit reset register,                     Address offset: 0x28 */
-}GPIO_TypeDef;
+} GPIO_TypeDef;
 
 /**
   * @brief LPTIMIMER
@@ -2620,6 +2622,11 @@ typedef struct
 #define GPIO_AFRL_AFSEL7_Pos             (28U)
 #define GPIO_AFRL_AFSEL7_Msk             (0xFUL << GPIO_AFRL_AFSEL7_Pos)          /*!< 0xF0000000 */
 #define GPIO_AFRL_AFSEL7                 GPIO_AFRL_AFSEL7_Msk
+
+/* Alternate functions */
+#define GPIO_AF2                         (0x2UL)
+#define GPIOA_AFSEL2_AF2_USART2_TX  (GPIO_AF2 << GPIO_AFRL_AFSEL2_Pos)
+#define GPIOA_AFSEL3_AF2_USART2_RX  (GPIO_AF2 << GPIO_AFRL_AFSEL3_Pos)
 
 /****************** Bit definition for GPIO_AFRH register ********************/
 #define GPIO_AFRH_AFSEL8_Pos             (0U)

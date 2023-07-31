@@ -114,17 +114,17 @@ delay_s(uint32_t s) {
 }
 
 
-static void
-uart_init() {
-    const char * msg = "Hello\r\n";
+void
+dma_memory_to_peripheral_circular(volatile uint32_t *peripheral,
+        const char *data, uint32_t count) {
     /* Set USART1 TX data register address into DMA Channel 4 */
-    DMA1_CH3->CPAR = (uint32_t)&USART1->TDR;
+    DMA1_CH3->CPAR = (uint32_t)peripheral;
 
     /* Set pointer to data to be sent */
-    DMA1_CH3->CMAR = (uint32_t)msg;
+    DMA1_CH3->CMAR = (uint32_t)data;
 
     /* Set size of data to be sent */
-    DMA1_CH3->CNDTR = strlen(msg);
+    DMA1_CH3->CNDTR = count;
 
     /* Configure the channel priority to medium level */
     /*
@@ -166,13 +166,52 @@ uart_init() {
 
     /* Enable interrpt after full transfer */
     DMA1_CH3->CCR |= DMA_CCR_TCIE;
+}
 
-    // TODO:
-    /* Enable the channel */
-    //DMA1_CH3->CCR |= DMA_CCR_EN;
 
-    /* Enable DMA mode for transmitter */
-    //USART1->CR3 |= USART_CR3_DMAT;
+static void
+usart2_init() {
+    /*
+    USART2 pins
+    RX,     pin 12, PA2, APB1
+    TX,     pin 13, PA3, APB1
+    Wakeup, pin 10, PA0
+    */
+    // const char * msg = "Hello\r\n";
+
+    /* Enable clock for GPIOA and USART1 */
+    RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
+    RCC->IOPENR |= RCC_IOPENR_IOPAEN;
+
+    /* Reset mode configuration bits for PA2 and PA3 */
+    GPIOA->MODER &= ~(GPIO_MODER_MODE2 | GPIO_MODER_MODE3);
+
+    /* Select alternate function mode for PA2 and PA3 */
+    GPIOA->MODER |= GPIO_MODER_MODE2_1 | GPIO_MODER_MODE3_1;
+
+    /* Select alternate functions of PA2 and PA3 */
+    GPIOA->AFRL &= ~(GPIO_AFRL_AFSEL2_Msk | GPIO_AFRL_AFSEL3_Msk);
+    GPIOA->AFRL |= GPIOA_AFSEL2_AF2_USART2_TX | GPIOA_AFSEL3_AF2_USART2_RX;
+    // GPIOx_AFRH
+    // GPIOA->
+    // // Reset pin configurations for PA9 and PA10
+    // GPIOA->CRH &= ~(GPIO_CRH_MODE10 | GPIO_CRH_MODE9 | GPIO_CRH_CNF10 |
+    //         GPIO_CRH_CNF9);
+
+    // // PA9 as Output@50Hz Alternate function
+    // GPIOA->CRH |= GPIO_CRH_MODE9_0 | GPIO_CRH_MODE9_1 | GPIO_CRH_CNF9_1;
+
+    // // PA10 as floating input
+    // GPIOA->CRH |= GPIO_CRH_CNF10_0;
+
+    // dma_memory_to_peripheral_circular(&USART1->TDR, msg, strlen(msg));
+
+    // // TODO:
+    // /* Enable the channel */
+    // //DMA1_CH3->CCR |= DMA_CCR_EN;
+
+    // /* Enable DMA mode for transmitter */
+    // //USART1->CR3 |= USART_CR3_DMAT;
 }
 
 
@@ -184,5 +223,5 @@ device_init() {
 #endif
 
     clock_init();
-    uart_init();
+    usart2_init();
 }
