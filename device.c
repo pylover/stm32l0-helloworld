@@ -191,7 +191,9 @@ usart2_init() {
 
     /* Select alternate functions of PA2 and PA3 */
     GPIOA->AFRL &= ~(GPIO_AFRL_AFSEL2_Msk | GPIO_AFRL_AFSEL3_Msk);
-    GPIOA->AFRL |= GPIOA_AFSEL2_AF2_USART2_TX | GPIOA_AFSEL3_AF2_USART2_RX;
+    GPIOA->AFRL |=
+        GPIOA_AFRL_AFSEL2_AF2_USART2_TX |
+        GPIOA_AFRL_AFSEL3_AF2_USART2_RX;
     // GPIOx_AFRH
     // GPIOA->
     // // Reset pin configurations for PA9 and PA10

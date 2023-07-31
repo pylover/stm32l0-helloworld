@@ -2625,8 +2625,8 @@ typedef struct
 
 /* Alternate functions */
 #define GPIO_AF2                         (0x2UL)
-#define GPIOA_AFSEL2_AF2_USART2_TX  (GPIO_AF2 << GPIO_AFRL_AFSEL2_Pos)
-#define GPIOA_AFSEL3_AF2_USART2_RX  (GPIO_AF2 << GPIO_AFRL_AFSEL3_Pos)
+#define GPIOA_AFRL_AFSEL2_AF2_USART2_TX  (GPIO_AF2 << GPIO_AFRL_AFSEL2_Pos)
+#define GPIOA_AFRL_AFSEL3_AF2_USART2_RX  (GPIO_AF2 << GPIO_AFRL_AFSEL3_Pos)
 
 /****************** Bit definition for GPIO_AFRH register ********************/
 #define GPIO_AFRH_AFSEL8_Pos             (0U)
