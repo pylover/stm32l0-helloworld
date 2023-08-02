@@ -138,6 +138,7 @@ add_custom_target(flash
 # Debug
 add_custom_target(openocd
     COMMAND openocd ${OPENOCD_FLAGS} 
+    `printenv OPENOCD_ARGS`
     -c \"program ${OUTFILE} reset\"
     DEPENDS ${CMAKE_PROJECT_NAME}
 )
@@ -145,9 +146,13 @@ add_custom_target(gdb
     COMMAND ${TOOLCHAIN_PREFIX}gdb 
     -q
     --init-eval-command='target extended-remote :3333'
+    --init-eval-command='set remotetimeout 120'
     --init-eval-command='monitor arm semihosting enable'
     --command=${PROJECT_SOURCE_DIR}/gdbinit
     ${OUTFILE}
+)
+add_custom_target(debug
+    COMMAND ../scripts/debug.sh
 )
 
 

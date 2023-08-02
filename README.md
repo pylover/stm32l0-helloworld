@@ -82,6 +82,12 @@ Then, run `make gdb` in another terminal.
 make gdb
 ```
 
+Or, run `make debug` to automate the above two commands:
+
+```bash
+make debug
+```
+
 #### Lint
 
 ```bash

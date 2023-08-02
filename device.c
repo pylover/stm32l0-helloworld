@@ -180,8 +180,8 @@ usart2_init() {
     // const char * msg = "Hello\r\n";
 
     /* Enable clock for GPIOA and USART1 */
-    RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
     RCC->IOPENR |= RCC_IOPENR_IOPAEN;
+    RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
 
     /* Reset mode configuration bits for PA2 and PA3 */
     GPIOA->MODER &= ~(GPIO_MODER_MODE2 | GPIO_MODER_MODE3);
@@ -194,20 +194,14 @@ usart2_init() {
     GPIOA->AFRL |=
         GPIOA_AFRL_AFSEL2_AF2_USART2_TX |
         GPIOA_AFRL_AFSEL3_AF2_USART2_RX;
-    // GPIOx_AFRH
-    // GPIOA->
-    // // Reset pin configurations for PA9 and PA10
-    // GPIOA->CRH &= ~(GPIO_CRH_MODE10 | GPIO_CRH_MODE9 | GPIO_CRH_CNF10 |
-    //         GPIO_CRH_CNF9);
 
-    // // PA9 as Output@50Hz Alternate function
-    // GPIOA->CRH |= GPIO_CRH_MODE9_0 | GPIO_CRH_MODE9_1 | GPIO_CRH_CNF9_1;
+    /* Word length: 00: 1 Start bit, 8 data bits, n stop bits */
+    USART2->CR1 &= ~(USART_CR1_M1 | USART_CR1_M0);
 
-    // // PA10 as floating input
-    // GPIOA->CRH |= GPIO_CRH_CNF10_0;
+    /* Enable the USART2 */
+    USART2->CR1 = USART_CR1_UE;
 
     // dma_memory_to_peripheral_circular(&USART1->TDR, msg, strlen(msg));
-
     // // TODO:
     // /* Enable the channel */
     // //DMA1_CH3->CCR |= DMA_CCR_EN;
