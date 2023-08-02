@@ -36,8 +36,12 @@ list_descendants() {
 exitfn () {
     trap SIGINT
     if [ -n "${ocdpid}" ]; then
-      echo "Killing pid $ocdpid and all children"
-      kill $(list_descendants $ocdpid)
+      echo
+      echo "Killing pid ${ocdpid} and all children"
+      children=$(list_descendants ${ocdpid})
+      if [ -n "${children}" ]; then
+        kill $(list_descendants ${ocdpid})
+      fi
       # killall openocd
     fi
     exit 
