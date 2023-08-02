@@ -7,7 +7,7 @@ set(STM_FAMILY "stm32")
 set(STM_TYPE "stm32l0xx")
 set(STM_CHIP "stm32l071cztx")
 set(LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/${STM_FAMILY}/${STM_CHIP}_flash.ld")
-set(OUTFILE "${CMAKE_PROJECT_NAME}.elf")
+set(ELF "${CMAKE_PROJECT_NAME}.elf")
 
 
 # Verbosity
@@ -130,7 +130,7 @@ set(OPENOCD_FLAGS
 # Flash the chip
 add_custom_target(flash
     COMMAND openocd ${OPENOCD_FLAGS}
-    -c \"program ${OUTFILE} verify reset exit\"
+    -c \"program ${ELF} verify reset exit\"
     DEPENDS ${CMAKE_PROJECT_NAME}
 )
 
@@ -139,7 +139,7 @@ add_custom_target(flash
 add_custom_target(openocd
     COMMAND openocd ${OPENOCD_FLAGS} 
     `printenv OPENOCD_ARGS`
-    -c \"program ${OUTFILE} reset\"
+    -c \"program ${ELF} reset\"
     DEPENDS ${CMAKE_PROJECT_NAME}
 )
 add_custom_target(gdb
@@ -149,7 +149,7 @@ add_custom_target(gdb
     --init-eval-command='set remotetimeout 120'
     --init-eval-command='monitor arm semihosting enable'
     --command=${PROJECT_SOURCE_DIR}/gdbinit
-    ${OUTFILE}
+    ${ELF}
 )
 add_custom_target(debug
     COMMAND ../scripts/debug.sh
@@ -157,6 +157,6 @@ add_custom_target(debug
 
 
 # Analyze ELF file
-add_custom_target(elfread COMMAND readelf -l ${OUTFILE})
-add_custom_target(elfsize COMMAND ${CMAKE_SIZE} -tA ${OUTFILE})
+add_custom_target(elfread COMMAND readelf -l ${ELF})
+add_custom_target(elfsize COMMAND ${CMAKE_SIZE} -tA ${ELF})
 add_custom_target(analyze DEPENDS elfsize elfread)
