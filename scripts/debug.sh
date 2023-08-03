@@ -42,7 +42,6 @@ exitfn () {
       if [ -n "${children}" ]; then
         kill $(list_descendants ${ocdpid})
       fi
-      # killall openocd
     fi
     exit 
 }
