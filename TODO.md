@@ -6,3 +6,8 @@
 - Firewall
 - RCC_AHBENR, RCC_APB2ENR, RCC_APB1ENR and RCC_IOPENR
 - Remove clog from production build
+
+https://medium.com/@csrohit/working-with-usart-and-dma-in-stm32-arm-cortex-m3-6a0e8b3174f3
+https://medium.com/@csrohit/stm32-blue-pill-usart-programming-f159dd6d896b
+https://wiki.st.com/stm32mpu/wiki/STM32MP15_resources#Reference_manuals
+https://www.st.com/en/microcontrollers-microprocessors/stm32l0x1/documentation.html

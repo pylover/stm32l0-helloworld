@@ -48,6 +48,21 @@ SysTick_Handler(void) {
 
 
 void
+delay_ms(uint32_t ms) {
+    ticks_ms = ms;
+    while (ticks_ms) {}
+}
+
+
+void
+delay_s(uint32_t s) {
+    while (s--) {
+        delay_ms(1000);
+    }
+}
+
+
+void
 RCC_CRS_IRQHandler(void) {
     /* Check if HSE is ready */
     if ((RCC->CR & RCC_CR_HSERDY) == 0) {
@@ -72,9 +87,14 @@ RCC_CRS_IRQHandler(void) {
 }
 
 
+/** System clock initialization
+ * HSE (12MHz) crystal is selected as main system clock,
+ * AHB prescaler: TODO
+ * APB prescaler: TODO
+ */
 /**
 * This function enables the interrupton HSE ready,
-* And start the HSE as external clock with crystal + security.
+* And start the HSE as external clock with crystal + security(TODO).
 */
 inline static void
 clock_init() {
@@ -96,21 +116,6 @@ clock_init() {
     RCC->AHBENR &= ~RCC_AHBENR_CRYPEN;
     RCC->AHBENR &= ~RCC_AHBENR_CRCEN;
     RCC->AHBENR |= RCC_AHBENR_DMAEN;
-}
-
-
-void
-delay_ms(uint32_t ms) {
-    ticks_ms = ms;
-    while (ticks_ms) {}
-}
-
-
-void
-delay_s(uint32_t s) {
-    while (s--) {
-        delay_ms(1000);
-    }
 }
 
 
@@ -169,6 +174,10 @@ dma_memory_to_peripheral_circular(volatile uint32_t *peripheral,
 }
 
 
+/** USART2 initializer
+  * baud = 2 X PCLK / USART2DIV
+  * div = 2 X PCLK / baud
+  */
 static void
 usart2_init() {
     /*
@@ -182,6 +191,30 @@ usart2_init() {
     /* Enable clock for GPIOA and USART1 */
     RCC->IOPENR |= RCC_IOPENR_IOPAEN;
     RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
+
+    /* Oversampling
+
+    Select oversampling by 8 (OVER8=1) to achieve higher speed (up to fCK/8).
+    In this case the maximum receiver tolerance to clock deviation is reduced
+
+    Select oversampling by 16 (OVER8=0) to increase the tolerance of the
+    receiver to clock deviations. In this case, the maximum speed is limited
+    to maximum fCK/16 where fCK is the clock source frequency.
+    */
+    USART2->CR1 |= USART_CR1_OVER8;
+
+    /* Clock configuration register (RCC_CCIPR)
+    USART2SEL: USART2 clock source selection bits
+    This bit is set and cleared by software.
+    00: APB clock selected as USART2 clock
+    01: System clock selected as USART2 clock
+    10: HSI16 clock selected as USART2 clock
+    11: LSE clock selected as USART2 clock
+    */
+    // RCC->CCIPR |=
+
+    /* TODO: USART2 clock enable during Sleep mode bit */
+    /* RCC_APB1SMENR: Bit 17 USART2SMEN */
 
     /* Reset mode configuration bits for PA2 and PA3 */
     GPIOA->MODER &= ~(GPIO_MODER_MODE2 | GPIO_MODER_MODE3);
