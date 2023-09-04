@@ -34,6 +34,9 @@ extern volatile uint32_t ticks_ms;
 #define SYSTICKS ((uint32_t)1000U)
 
 
+#include "stm32l0xx.h"
+
+
 void
 device_init();
 

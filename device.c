@@ -62,27 +62,91 @@ delay_s(uint32_t s) {
 }
 
 
+/* Initialize RTC clock. */
+inline static void
+rtc_init() {
+    /* Disable the RTC register write protection. */
+    RTC->WPR = 0xCA;
+    RTC->WPR = 0x53;
+
+    /* Enter to initialization mode */
+    RTC->ISR = RTC_ISR_INIT;
+
+    /* Wait to enter initialization mode, 2 RTC clocks */
+    while ((RTC->ISR & RTC_ISR_INITF) != RTC_ISR_INITF) {}
+
+    /* Program the prescaler values */
+    RTC->PRER &= ~RTC_PRER_PREDIV_A_Msk;
+    RTC->PRER |= 0x7fUL << RTC_PRER_PREDIV_A_Pos;
+    RTC->PRER &= ~RTC_PRER_PREDIV_S_Msk;
+    RTC->PRER |= 0xffUL << RTC_PRER_PREDIV_S_Pos;
+
+    /* Set initial date and time */
+    RTC->TR = 0;
+    RTC->DR = 0;
+
+    /* 24 Hours style
+     * 0: 24 hour/day format
+     * 1: AM/PM hour format
+     */
+    RTC->CR &= ~RTC_CR_FMT_Msk;
+
+    /* Exit initialization mode */
+    RTC->ISR = ~RTC_ISR_INIT_Msk;
+
+    /* Enable RTC register write protection. */
+    RTC->WPR = 0xFE;
+    RTC->WPR = 0x64;
+}
+
+
 void
 RCC_CRS_IRQHandler(void) {
     /* Check if HSE is ready */
-    if ((RCC->CR & RCC_CR_HSERDY) == 0) {
-        printf("HSE is not ready ready\n");
-        return;
+    if ((RCC->CR & RCC_CR_HSERDY) == RCC_CR_HSERDY) {
+        printf("HSE is ready\n");
+
+        /* Clear the HSE ready interrupt */
+        RCC->CICR |= RCC_CICR_HSERDYC;
+
+        /* Switch SYSCLK to HSE source */
+        RCC->CFGR &= ~RCC_CFGR_SW_Msk;
+        RCC->CFGR |= RCC_CFGR_SW_HSE;
+
+        /* Update system clock variable */
+        system_clock_update();
+        INFO("HSE Clock: %luHz\n", system_clock);
+
+        /* SysTick */
+        if (SysTick_Config(system_clock / SYSTICKS)) {
+            ERROR("SYSTICKS is too large");
+        }
     }
 
-    /* Clear the HSE ready interrupt */
-    RCC->CICR |= RCC_CICR_HSERDYC;
+    if ((RCC->CSR & RCC_CSR_LSERDY) == RCC_CSR_LSERDY) {
+        printf("LSE is ready\n");
 
-    /* Switch SYSCLK to HSE source */
-    RCC->CFGR |= RCC_CFGR_SW_HSE;
+        /* Clear the LSE ready interrupt */
+        RCC->CICR |= RCC_CICR_LSERDYC;
 
-    /* Update system clock variable */
-    system_clock_update();
-    INFO("HSE Clock: %luHz\n", system_clock);
+        /* Select the RTC clock source through RTCSEL[1:0] bits in RCC_CSR
+         * register.
+         *
+         * 00: No clock
+         * 01: LSE oscillator clock used as RTC clock
+         * 10: LSI oscillator clock used as RTC clock
+         * 11: HSE oscillator clock divided by a programmable prescaler
+         *     (selection through the RTCPRE[1:0] bits in the RCC clock
+         *     control register (RCC_CR)) used as the RTC clock
+         */
+        RCC->CSR &= ~RCC_CSR_RTCSEL_Msk;
+        RCC->CSR |= RCC_CSR_RTCSEL_0;
 
-    /* SysTick */
-    if (SysTick_Config(system_clock / SYSTICKS)) {
-        ERROR("SYSTICKS is too large");
+        /* Enable the RTC clock by programming the RTCEN bit in the RCC_CSR
+           register. */
+        RCC->CSR |= RCC_CSR_RTCEN;
+
+        rtc_init();
     }
 }
 
@@ -102,17 +166,53 @@ clock_init() {
     NVIC_EnableIRQ(RCC_CRS_IRQn);
     NVIC_SetPriority(RCC_CRS_IRQn, 0);
 
+    /* LSE */
+    /* Enable the power interface clock by setting the PWREN bits in the
+       RCC_APB1ENR */
+    RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+
+    /* Set the DBP(Disable backup write protection) bit in the PWR_CR register
+       (see Section 6.4.1). */
+    PWR->CR |= PWR_CR_DBP;
+
+    /* Enable interrupt on LSE becomes ready */
+    RCC->CIER |= RCC_CIER_LSERDYIE;
+
+    /* Not bypass LSE */
+    RCC->CSR &= ~RCC_CSR_LSEBYP;
+
+    /* Enable LSE */
+    /* 32.768Khz crystal is connected to pins: OSC32IN, OSC32OUT */
+    RCC->CSR &= ~RCC_CSR_LSEON;
+    RCC->CSR |= RCC_CSR_LSEON;
+
+    /* LSEDRV; LSE oscillator Driving capability bits
+     * These bits are set by software to select the driving capability of the
+     * LSE oscillator.
+     * They are cleared by a power-on reset or an RTC reset. Once “00” has
+     * been written, the content of LSEDRV cannot be changed by software.
+     * 00: Lowest drive
+     * 01: Medium low drive
+     * 10: Medium high drive
+     * 11: Highest drive
+     */
+    RCC->CSR &= ~RCC_CSR_LSEDRV;
+    RCC->CSR |= RCC_CSR_LSEDRV_0 | RCC_CSR_LSEDRV_1;
+
+    /* HSE */
     /* Enable interrupt on HSE becomes ready */
     RCC->CIER |= RCC_CIER_HSERDYIE;
 
     /* Disable PLL */
     RCC->CR &= ~RCC_CR_PLLON;
+    RCC->CFGR &= ~RCC_CFGR_PLLDIV;
 
     /* Enable HSE without security */
     RCC->CR |= RCC_CR_HSEON;
 
     /* AHB */
-    RCC->CFGR &= (~RCC_CFGR_HPRE_Msk) | RCC_CFGR_HPRE_DIV4;
+    RCC->CFGR &= ~RCC_CFGR_HPRE_Msk;
+    RCC->CFGR |= RCC_CFGR_HPRE_DIV4;
     RCC->AHBENR &= ~RCC_AHBENR_CRYPEN;
     RCC->AHBENR &= ~RCC_AHBENR_CRCEN;
     RCC->AHBENR |= RCC_AHBENR_DMAEN;
