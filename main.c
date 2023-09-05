@@ -32,19 +32,18 @@ startA(struct uaio_task *self) {
     static struct uaio_sleep sleep = {2000};
     CORO_START;
     INFO("Initializing...");
-    device_init();
+    CORO_WAIT(device_init, NULL);
 
     INFO("Starting...");
 
     while (1) {
         // delay_s(5);
         CORO_WAIT(sleepA, &sleep);
-        INFO("Ticks: %d", t++);
 
         seconds = (RTC->TR & RTC_TR_ST) >> RTC_TR_ST_Pos;
         seconds *= 10;
         seconds += RTC->TR & RTC_TR_SU;
-        INFO("RTC: %d", seconds);
+        INFO("Ticks: %d, RTC: %d", t++, seconds);
     }
 
     CORO_FINALLY;
@@ -61,7 +60,6 @@ main(void) {
 #else
     clog_verbosity = CLOG_DEBUG;
 #endif
-
 
     return UAIO(startA, NULL, 2);
 }

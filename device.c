@@ -17,7 +17,9 @@
  *  Author: Vahid Mardani <vahid.mardani@gmail.com>
  */
 #include <stdio.h>
+
 #include "clog.h"
+#include "uaio.h"
 #include "device.h"
 #include "stm32l0xx.h"
 
@@ -167,8 +169,13 @@ rtc_init() {
 }
 
 
+static struct uaio_task *inittask = NULL;
+
+
 void
 RCC_CRS_IRQHandler(void) {
+    static int counter = 0;
+
     /* Check if HSE is ready */
     if ((RCC->CR & RCC_CR_HSERDY) == RCC_CR_HSERDY) {
         printf("HSE is ready\n");
@@ -188,6 +195,7 @@ RCC_CRS_IRQHandler(void) {
         if (SysTick_Config(system_clock / SYSTICKS)) {
             ERROR("SYSTICKS is too large");
         }
+        counter++;
     }
 
     if ((RCC->CSR & RCC_CSR_LSERDY) == RCC_CSR_LSERDY) {
@@ -213,8 +221,18 @@ RCC_CRS_IRQHandler(void) {
            register. */
         RCC->CSR |= RCC_CSR_RTCEN;
 
+        counter++;
+    }
+
+    if (counter == 2) {
         rtc_init();
         timers_init();
+
+        DEBUG("CLock done");
+        if (inittask != NULL) {
+            inittask->status = UAIO_RUNNING;
+            inittask = NULL;
+        }
     }
 }
 
@@ -228,8 +246,11 @@ RCC_CRS_IRQHandler(void) {
 * This function enables the interrupton HSE ready,
 * And start the HSE as external clock with crystal + security(TODO).
 */
-inline static void
-clock_init() {
+inline static ASYNC
+clock_init(struct uaio_task *self) {
+    CORO_START;
+    inittask = self;
+    DEBUG("CLock init");
     /* Enable high periority interrupt on RCC */
     NVIC_EnableIRQ(RCC_CRS_IRQn);
     NVIC_SetPriority(RCC_CRS_IRQn, 0);
@@ -321,6 +342,9 @@ clock_init() {
      * 111: HCLK divided by 16
      */
     RCC->CFGR &= ~RCC_CFGR_PPRE1_Msk;
+
+    CORO_WAITI();
+    CORO_FINALLY;
 }
 
 
@@ -449,13 +473,16 @@ usart2_init() {
 }
 
 
-void
-device_init() {
+ASYNC
+device_init(struct uaio_task *self) {
+    CORO_START;
 #ifndef PROD
     /* Semihosting debug */
     initialise_monitor_handles();
 #endif
 
-    clock_init();
+    CORO_WAIT(clock_init, NULL);
     usart2_init();
+
+    CORO_FINALLY;
 }
