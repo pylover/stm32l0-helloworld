@@ -82,6 +82,7 @@ add_executable(${CMAKE_PROJECT_NAME}
     $<TARGET_OBJECTS:clog>
     ${STM_FAMILY}/${STM_TYPE}.s
     ${STM_FAMILY}/${STM_TYPE}_system.c
+    uaio.c
     device.c
     main.c
 )

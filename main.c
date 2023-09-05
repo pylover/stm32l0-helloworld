@@ -22,32 +22,46 @@
 
 #include "clog.h"
 #include "device.h"
+#include "uaio.h"
 
-// #include <stm32l0xx.h>
 
-
-int
-main(void) {
-    int seconds;
-#ifdef PROD
-    clog_verbosity = CLOG_SILENT;
-#else
-    clog_verbosity = CLOG_DEBUG;
-#endif
-
+static ASYNC
+startA(struct uaio_task *self) {
+    static int seconds;
+    static int t = 0;
+    static struct uaio_sleep sleep = {2000};
+    CORO_START;
     INFO("Initializing...");
     device_init();
 
     INFO("Starting...");
-    // int t = 0;
 
     while (1) {
-        delay_s(5);
-        // INFO("Ticks: %d", t++);
+        // delay_s(5);
+        CORO_WAIT(sleepA, &sleep);
+        INFO("Ticks: %d", t++);
 
         seconds = (RTC->TR & RTC_TR_ST) >> RTC_TR_ST_Pos;
         seconds *= 10;
         seconds += RTC->TR & RTC_TR_SU;
         INFO("RTC: %d", seconds);
     }
+
+    CORO_FINALLY;
+}
+
+
+static volatile int resume = 1;
+
+
+int
+main(void) {
+#ifdef PROD
+    clog_verbosity = CLOG_SILENT;
+#else
+    clog_verbosity = CLOG_DEBUG;
+#endif
+
+
+    return UAIO(startA, NULL, 2);
 }

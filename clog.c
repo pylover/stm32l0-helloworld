@@ -22,7 +22,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <unistd.h>
-#include <errno.h>
 #include <string.h>
 
 
@@ -115,10 +114,6 @@ clog_vlog(
     if (format) {
         dprintf(fd, " ");
         vdprintf(fd, format, args);
-    }
-
-    if (errno && (level != CLOG_INFO)) {
-        dprintf(fd, " -- %s. errno: %d", strerror(errno), errno);
     }
 
     if (newline) {
