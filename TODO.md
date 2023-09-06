@@ -1,5 +1,4 @@
 ## TODO
-- RTC interrupts
 - Auto wakeup
 - Deep Sleep
 

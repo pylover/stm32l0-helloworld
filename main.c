@@ -21,6 +21,7 @@
 
 
 #include "clog.h"
+#include "rtc.h"
 #include "device.h"
 #include "uaio.h"
 
@@ -35,8 +36,8 @@ startA(struct uaio_task *self) {
     INFO("Starting...");
 
     while (1) {
-        // delay_s(5);
         CORO_WAIT(sleepA, &sleep);
+        print_date(false);
         print_time();
     }
 

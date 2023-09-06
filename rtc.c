@@ -61,9 +61,9 @@ rtc_init() {
     RTC->CR |= RTC_CR_COE;
     RTC->CR &= ~RTC_CR_COSEL;
     while((RTC->ISR & RTC_ISR_RECALPF) == RTC_ISR_RECALPF) {}
-    // RTC->CALR |= RTC_CALR_CALW8;
     RTC->CALR |= RTC_CALR_CALP;
     RTC->CALR |= 0xFF;
+    // RTC->CALR |= RTC_CALR_CALW8;
     // RTC->CALR |= RTC_CALR_CALW16;
     // RTC->CALR &= ~RTC_CALR_CALM;
 
@@ -78,13 +78,13 @@ rtc_init() {
 
 void
 print_time() {
-    /*
-    To be able to read the RTC calendar register when the APB1 clock frequency is less than
-    seven times the RTC clock frequency (7*RTCLCK), the software must read the calendar
-    time and date registers twice.
-    If the second read of the RTC_TR gives the same result as the first read, this ensures that
-    the data is correct. Otherwise a third read access must be done
-*/
+    /* To be able to read the RTC calendar register when the APB1 clock
+     * frequency is less than seven times the RTC clock frequency (7*RTCLCK),
+     * the software must read the calendar time and date registers twice.
+     * If the second read of the RTC_TR gives the same result as the first
+     * read, this ensures that the data is correct. Otherwise a third read
+     * access must be done.
+     */
 
     unsigned long tr = RTC->TR;
     unsigned long tr2 = RTC->TR;
@@ -93,11 +93,41 @@ print_time() {
         tr = RTC->TR;
     }
 
-    INFOH("%d%d:%d%d",
+    INFOH("%d%d:%d%d:%d%d",
+           (int) (tr & RTC_TR_HT) >> RTC_TR_HT_Pos,
+           (int) (tr & RTC_TR_HU) >> RTC_TR_HU_Pos,
            (int) (tr & RTC_TR_MNT) >> RTC_TR_MNT_Pos,
            (int) (tr & RTC_TR_MNU) >> RTC_TR_MNU_Pos,
            (int) (tr & RTC_TR_ST) >> RTC_TR_ST_Pos,
            (int) (tr & RTC_TR_SU) >> RTC_TR_SU_Pos);
 }
 
+
+
+void
+print_date(bool newline) {
+    /* To be able to read the RTC calendar register when the APB1 clock
+     * frequency is less than seven times the RTC clock frequency (7*RTCLCK),
+     * the software must read the calendar time and date registers twice.
+     * If the second read of the RTC_TR gives the same result as the first
+     * read, this ensures that the data is correct. Otherwise a third read
+     * access must be done.
+     */
+
+    unsigned long tr = RTC->DR;
+    unsigned long tr2 = RTC->DR;
+
+    if (tr != tr2) {
+        tr = RTC->DR;
+    }
+
+    INFONH("%d%d-%d%d-%d%d%c",
+           (int) ((tr & RTC_DR_YT) >> RTC_DR_YT_Pos),
+           (int) ((tr & RTC_DR_YU) >> RTC_DR_YU_Pos),
+           (int) ((tr & RTC_DR_MT) >> RTC_DR_MT_Pos),
+           (int) ((tr & RTC_DR_MU) >> RTC_DR_MU_Pos),
+           (int) ((tr & RTC_DR_DT) >> RTC_DR_DT_Pos),
+           (int) ((tr & RTC_DR_DU) >> RTC_DR_DU_Pos),
+           newline? '\n': ' ');
+}
 

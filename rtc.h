@@ -20,8 +20,15 @@
 #define RTC_H_
 
 
+#include <stdbool.h>
+
+
 void
 rtc_init();
+
+
+void
+print_date(bool newline);
 
 
 #endif  // RTC_H_
