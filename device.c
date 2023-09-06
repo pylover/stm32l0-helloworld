@@ -18,10 +18,11 @@
  */
 #include <stdio.h>
 
+#include "stm32l0xx.h"
 #include "clog.h"
 #include "uaio.h"
 #include "device.h"
-#include "stm32l0xx.h"
+#include "rtc.h"
 
 
 #ifndef PROD
@@ -66,8 +67,6 @@ delay_s(uint32_t s) {
 
 inline static void
 timers_init() {
-
-    DEBUG("Configuring timers");
     /* Enable TIM2 clock */
     __disable_irq();
     TIM2->CR1 &= ~TIM_CR1_CEN;
@@ -131,44 +130,6 @@ counter underflow event. */
 }
 
 
-/* Initialize RTC clock. */
-inline static void
-rtc_init() {
-    /* Disable the RTC register write protection. */
-    RTC->WPR = 0xCA;
-    RTC->WPR = 0x53;
-
-    /* Enter to initialization mode */
-    RTC->ISR = RTC_ISR_INIT;
-
-    /* Wait to enter initialization mode, 2 RTC clocks */
-    while ((RTC->ISR & RTC_ISR_INITF) != RTC_ISR_INITF) {}
-
-    /* Program the prescaler values */
-    RTC->PRER &= ~RTC_PRER_PREDIV_A_Msk;
-    RTC->PRER |= 0x7fUL << RTC_PRER_PREDIV_A_Pos;
-    RTC->PRER &= ~RTC_PRER_PREDIV_S_Msk;
-    RTC->PRER |= 0xffUL << RTC_PRER_PREDIV_S_Pos;
-
-    /* Set initial date and time */
-    RTC->TR = 0;
-    RTC->DR = 0;
-
-    /* 24 Hours style
-     * 0: 24 hour/day format
-     * 1: AM/PM hour format
-     */
-    RTC->CR &= ~RTC_CR_FMT_Msk;
-
-    /* Exit initialization mode */
-    RTC->ISR = ~RTC_ISR_INIT_Msk;
-
-    /* Enable RTC register write protection. */
-    RTC->WPR = 0xFE;
-    RTC->WPR = 0x64;
-}
-
-
 static struct uaio_task *inittask = NULL;
 
 
@@ -204,23 +165,6 @@ RCC_CRS_IRQHandler(void) {
         /* Clear the LSE ready interrupt */
         RCC->CICR |= RCC_CICR_LSERDYC;
 
-        /* Select the RTC clock source through RTCSEL[1:0] bits in RCC_CSR
-         * register.
-         *
-         * 00: No clock
-         * 01: LSE oscillator clock used as RTC clock
-         * 10: LSI oscillator clock used as RTC clock
-         * 11: HSE oscillator clock divided by a programmable prescaler
-         *     (selection through the RTCPRE[1:0] bits in the RCC clock
-         *     control register (RCC_CR)) used as the RTC clock
-         */
-        RCC->CSR &= ~RCC_CSR_RTCSEL_Msk;
-        RCC->CSR |= RCC_CSR_RTCSEL_0;
-
-        /* Enable the RTC clock by programming the RTCEN bit in the RCC_CSR
-           register. */
-        RCC->CSR |= RCC_CSR_RTCEN;
-
         counter++;
     }
 
@@ -228,7 +172,6 @@ RCC_CRS_IRQHandler(void) {
         rtc_init();
         timers_init();
 
-        DEBUG("CLock done");
         if (inittask != NULL) {
             inittask->status = UAIO_RUNNING;
             inittask = NULL;
@@ -250,7 +193,7 @@ inline static ASYNC
 clock_init(struct uaio_task *self) {
     CORO_START;
     inittask = self;
-    DEBUG("CLock init");
+
     /* Enable high periority interrupt on RCC */
     NVIC_EnableIRQ(RCC_CRS_IRQn);
     NVIC_SetPriority(RCC_CRS_IRQn, 0);
@@ -260,20 +203,21 @@ clock_init(struct uaio_task *self) {
        RCC_APB1ENR */
     RCC->APB1ENR |= RCC_APB1ENR_PWREN;
 
-    /* Set the DBP(Disable backup write protection) bit in the PWR_CR register
-       (see Section 6.4.1). */
-    PWR->CR |= PWR_CR_DBP;
+    /* Enable LSE */
+    /* 32.768Khz crystal is connected to pins: OSC32IN, OSC32OUT */
+    // RCC->CSR &= ~RCC_CSR_LSEON;
+    RCC->CSR |= RCC_CSR_LSEON;
 
     /* Enable interrupt on LSE becomes ready */
     RCC->CIER |= RCC_CIER_LSERDYIE;
 
+    // /* Disable LSE security */
+    // RCC->CSR &= ~RCC_CSR_LSECSSON;
+    /* Enable LSE security */
+    RCC->CSR |= RCC_CSR_LSECSSON;
+
     /* Not bypass LSE */
     RCC->CSR &= ~RCC_CSR_LSEBYP;
-
-    /* Enable LSE */
-    /* 32.768Khz crystal is connected to pins: OSC32IN, OSC32OUT */
-    RCC->CSR &= ~RCC_CSR_LSEON;
-    RCC->CSR |= RCC_CSR_LSEON;
 
     /* LSEDRV; LSE oscillator Driving capability bits
      * These bits are set by software to select the driving capability of the
@@ -285,7 +229,7 @@ clock_init(struct uaio_task *self) {
      * 10: Medium high drive
      * 11: Highest drive
      */
-    RCC->CSR &= ~RCC_CSR_LSEDRV;
+    // RCC->CSR &= ~RCC_CSR_LSEDRV;
     RCC->CSR |= RCC_CSR_LSEDRV_0 | RCC_CSR_LSEDRV_1;
 
     /* HSE */
@@ -329,7 +273,7 @@ clock_init(struct uaio_task *self) {
      * 110: HCLK divided by 8
      * 111: HCLK divided by 16
      */
-    RCC->CFGR &= ~RCC_CFGR_PPRE2_Msk;
+    RCC->CFGR &= ~RCC_CFGR_PPRE2;
 
     /* APB1 */
     /* Bits 10:8 PPRE1[2:0]: APB low-speed prescaler (APB1)
@@ -341,7 +285,7 @@ clock_init(struct uaio_task *self) {
      * 110: HCLK divided by 8
      * 111: HCLK divided by 16
      */
-    RCC->CFGR &= ~RCC_CFGR_PPRE1_Msk;
+    RCC->CFGR &= ~RCC_CFGR_PPRE1;
 
     CORO_WAITI();
     CORO_FINALLY;

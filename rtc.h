@@ -16,41 +16,15 @@
  *
  *  Author: Vahid Mardani <vahid.mardani@gmail.com>
  */
-#ifndef DEVICE_H_
-#define DEVICE_H_
-
-
-#include <stdint.h>
-
-
-extern volatile uint32_t ticks_ms;
-
-
-/* Value of the external crystal oscillator in Hz */
-#define HSE_VALUE ((uint32_t)12000000U)
-
-
-/* SysTick devider */
-#define SYSTICKS ((uint32_t)1000U)
-
-
-#include "stm32l0xx.h"
+#ifndef RTC_H_
+#define RTC_H_
 
 
 void
-device_init();
+rtc_init();
 
 
-void
-delay_ms(uint32_t ms);
+#endif  // RTC_H_
 
 
-void
-delay_s(uint32_t s);
 
-
-void
-print_time();
-
-
-#endif  // DEVICE_H_

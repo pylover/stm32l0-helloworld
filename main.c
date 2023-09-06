@@ -27,8 +27,6 @@
 
 static ASYNC
 startA(struct uaio_task *self) {
-    static int seconds;
-    static int t = 0;
     static struct uaio_sleep sleep = {2000};
     CORO_START;
     INFO("Initializing...");
@@ -39,11 +37,7 @@ startA(struct uaio_task *self) {
     while (1) {
         // delay_s(5);
         CORO_WAIT(sleepA, &sleep);
-
-        seconds = (RTC->TR & RTC_TR_ST) >> RTC_TR_ST_Pos;
-        seconds *= 10;
-        seconds += RTC->TR & RTC_TR_SU;
-        INFO("Ticks: %d, RTC: %d", t++, seconds);
+        print_time();
     }
 
     CORO_FINALLY;
