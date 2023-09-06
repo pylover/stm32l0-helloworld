@@ -54,18 +54,18 @@ rtc_init() {
      */
     RTC->CR &= ~RTC_CR_FMT_Msk;
 
+    /* Exit initialization mode */
+    RTC->ISR &= ~RTC_ISR_INIT;
+
     /* Calibration */
-    // RTC->CR |= RTC_CR_COE;
-    // RTC->CR |= RTC_CR_COSEL;
+    RTC->CR |= RTC_CR_COE;
+    RTC->CR &= ~RTC_CR_COSEL;
     while((RTC->ISR & RTC_ISR_RECALPF) == RTC_ISR_RECALPF) {}
-    RTC->CALR |= RTC_CALR_CALW8;
-    RTC->CALR &= ~RTC_CALR_CALP;
+    // RTC->CALR |= RTC_CALR_CALW8;
+    RTC->CALR |= RTC_CALR_CALP;
     RTC->CALR |= 0xFF;
     // RTC->CALR |= RTC_CALR_CALW16;
     // RTC->CALR &= ~RTC_CALR_CALM;
-
-    /* Exit initialization mode */
-    RTC->ISR &= ~RTC_ISR_INIT;
 
     /* Enable RTC register write protection. */
     RTC->WPR = 0xFE;

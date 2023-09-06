@@ -44,9 +44,6 @@ startA(struct uaio_task *self) {
 }
 
 
-static volatile int resume = 1;
-
-
 int
 main(void) {
 #ifdef PROD
