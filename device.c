@@ -203,6 +203,10 @@ clock_init(struct uaio_task *self) {
        RCC_APB1ENR */
     RCC->APB1ENR |= RCC_APB1ENR_PWREN;
 
+    /* Set the DBP(Disable backup write protection) bit in the PWR_CR register
+       (see Section 6.4.1). */
+    PWR->CR |= PWR_CR_DBP;
+
     /* Enable LSE */
     /* 32.768Khz crystal is connected to pins: OSC32IN, OSC32OUT */
     // RCC->CSR &= ~RCC_CSR_LSEON;
@@ -211,10 +215,10 @@ clock_init(struct uaio_task *self) {
     /* Enable interrupt on LSE becomes ready */
     RCC->CIER |= RCC_CIER_LSERDYIE;
 
-    // /* Disable LSE security */
-    // RCC->CSR &= ~RCC_CSR_LSECSSON;
-    /* Enable LSE security */
-    RCC->CSR |= RCC_CSR_LSECSSON;
+    /* Disable LSE security */
+    RCC->CSR &= ~RCC_CSR_LSECSSON;
+    // /* Enable LSE security */
+    // RCC->CSR |= RCC_CSR_LSECSSON;
 
     /* Not bypass LSE */
     RCC->CSR &= ~RCC_CSR_LSEBYP;
@@ -229,8 +233,9 @@ clock_init(struct uaio_task *self) {
      * 10: Medium high drive
      * 11: Highest drive
      */
-    // RCC->CSR &= ~RCC_CSR_LSEDRV;
-    RCC->CSR |= RCC_CSR_LSEDRV_0 | RCC_CSR_LSEDRV_1;
+    RCC->CSR &= ~RCC_CSR_LSEDRV;
+    // RCC->CSR |= RCC_CSR_LSEDRV_0 | RCC_CSR_LSEDRV_1;
+    RCC->CSR |= RCC_CSR_LSEDRV_1;
 
     /* HSE */
     /* Enable interrupt on HSE becomes ready */

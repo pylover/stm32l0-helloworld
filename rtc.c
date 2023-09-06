@@ -8,9 +8,9 @@
 /* Initialize RTC clock. */
 void
 rtc_init() {
-    /* Set the DBP(Disable backup write protection) bit in the PWR_CR register
-       (see Section 6.4.1). */
-    PWR->CR |= PWR_CR_DBP;
+    /* Disable the RTC register write protection. */
+    RTC->WPR = 0xCA;
+    RTC->WPR = 0x53;
 
     /* Disable the RTC before configure*/
     RCC->CSR &= ~RCC_CSR_RTCEN;
@@ -28,16 +28,9 @@ rtc_init() {
     RCC->CSR &= ~RCC_CSR_RTCSEL;
     RCC->CSR |= RCC_CSR_RTCSEL_0;
 
-    // /* Enable backup write protection */
-    // PWR->CR &= ~PWR_CR_DBP;
-
     /* Enable the RTC clock by programming the RTCEN bit in the RCC_CSR
        register. */
     RCC->CSR |= RCC_CSR_RTCEN;
-
-    /* Disable the RTC register write protection. */
-    RTC->WPR = 0xCA;
-    RTC->WPR = 0x53;
 
     /* Enter to initialization mode */
     RTC->ISR = RTC_ISR_INIT;
@@ -77,6 +70,9 @@ rtc_init() {
     /* Enable RTC register write protection. */
     RTC->WPR = 0xFE;
     RTC->WPR = 0x64;
+
+    /* Enable backup write protection */
+    PWR->CR &= ~PWR_CR_DBP;
 }
 
 
