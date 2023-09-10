@@ -20,6 +20,7 @@
 
 #include "stm32l0xx.h"
 #include "clog.h"
+#include "uart.h"
 #include "uaio.h"
 #include "device.h"
 #include "rtc.h"
@@ -294,131 +295,6 @@ clock_init(struct uaio_task *self) {
 
     CORO_WAITI();
     CORO_FINALLY;
-}
-
-
-void
-dma_memory_to_peripheral_circular(volatile uint32_t *peripheral,
-        const char *data, uint32_t count) {
-    /* Set USART1 TX data register address into DMA Channel 4 */
-    DMA1_CH3->CPAR = (uint32_t)peripheral;
-
-    /* Set pointer to data to be sent */
-    DMA1_CH3->CMAR = (uint32_t)data;
-
-    /* Set size of data to be sent */
-    DMA1_CH3->CNDTR = count;
-
-    /* Configure the channel priority to medium level */
-    /*
-    00: low
-    01: medium
-    10: high
-    11: very high
-    */
-    DMA1_CH3->CCR &= ~(DMA_CCR_PL_0 | DMA_CCR_PL_1);
-
-    /* Configure data transfer direction, peripheral & memory incremented
-       mode, and peripheral & memory data size */
-
-    /* Set data transfer direction: memory -> peripheral */
-    /*
-    0: read from peripheral
-    1: read from memory
-    */
-    DMA1_CH3->CCR |= DMA_CCR_DIR;
-
-    /* Set the memory and pripheral write chunk size to one byte */
-    /*
-    00: 8 bits
-    01: 16 bits
-    10: 32 bits
-    11: reserved
-    */
-    DMA1_CH3->CCR &= ~(DMA_CCR_MSIZE_0 | DMA_CCR_MSIZE_0);
-    DMA1_CH3->CCR &= ~(DMA_CCR_PSIZE_0 | DMA_CCR_PSIZE_0);
-
-    /* Set memory address incement by one byte */
-    DMA1_CH3->CCR |= DMA_CCR_MINC;
-
-    /* Disable address incrementation on peripheral address */
-    DMA1_CH3->CCR &= ~DMA_CCR_PINC;
-
-    /* Enable circular mode */
-    DMA1_CH3->CCR |= DMA_CCR_CIRC;
-
-    /* Enable interrpt after full transfer */
-    DMA1_CH3->CCR |= DMA_CCR_TCIE;
-}
-
-
-/** USART2 initializer
-  * baud = 2 X PCLK / USART2DIV
-  * div = 2 X PCLK / baud
-  */
-static void
-usart2_init() {
-    /*
-    USART2 pins
-    RX,     pin 12, PA2, APB1
-    TX,     pin 13, PA3, APB1
-    Wakeup, pin 10, PA0
-    */
-    // const char * msg = "Hello\r\n";
-
-    /* Enable clock for GPIOA and USART1 */
-    RCC->IOPENR |= RCC_IOPENR_IOPAEN;
-    RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
-
-    /* Oversampling
-
-    Select oversampling by 8 (OVER8=1) to achieve higher speed (up to fCK/8).
-    In this case the maximum receiver tolerance to clock deviation is reduced
-
-    Select oversampling by 16 (OVER8=0) to increase the tolerance of the
-    receiver to clock deviations. In this case, the maximum speed is limited
-    to maximum fCK/16 where fCK is the clock source frequency.
-    */
-    USART2->CR1 |= USART_CR1_OVER8;
-
-    /* Clock configuration register (RCC_CCIPR)
-    USART2SEL: USART2 clock source selection bits
-    This bit is set and cleared by software.
-    00: APB clock selected as USART2 clock
-    01: System clock selected as USART2 clock
-    10: HSI16 clock selected as USART2 clock
-    11: LSE clock selected as USART2 clock
-    */
-    // RCC->CCIPR |=
-
-    /* TODO: USART2 clock enable during Sleep mode bit */
-    /* RCC_APB1SMENR: Bit 17 USART2SMEN */
-
-    /* Reset mode configuration bits for PA2 and PA3 */
-    GPIOA->MODER &= ~(GPIO_MODER_MODE2 | GPIO_MODER_MODE3);
-
-    /* Select alternate function mode for PA2 and PA3 */
-    GPIOA->MODER |= GPIO_MODER_MODE2_1 | GPIO_MODER_MODE3_1;
-
-    /* Select alternate functions of PA2 and PA3 */
-    GPIOA->AFRL &= ~(GPIO_AFRL_AFSEL2_Msk | GPIO_AFRL_AFSEL3_Msk);
-    GPIOA->AFRL |=
-        GPIOA_AFRL_AFSEL2_AF2_USART2_TX |
-        GPIOA_AFRL_AFSEL3_AF2_USART2_RX;
-
-    /* Word length: 00: 1 Start bit, 8 data bits, n stop bits */
-    USART2->CR1 &= ~(USART_CR1_M1 | USART_CR1_M0);
-
-    /* Enable the USART2 */
-    USART2->CR1 = USART_CR1_UE;
-
-    // dma_memory_to_peripheral_circular(&USART1->TDR, msg, strlen(msg));
-    // // TODO:
-    // /* Enable the channel */
-    // //DMA1_CH3->CCR |= DMA_CCR_EN;
-
-    // /* Enable DMA mode for transmitter */
-    // //USART1->CR3 |= USART_CR3_DMAT;
 }
 
 
