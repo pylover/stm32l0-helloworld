@@ -16,16 +16,37 @@
  *
  *  Author: Vahid Mardani <vahid.mardani@gmail.com>
  */
-#ifndef DEVICE_H_
-#define DEVICE_H_
+#ifndef CLOCK_H_
+#define CLOCK_H_
 
 
-void
-device_init();
+extern volatile uint32_t ticks_ms;
 
 
-void
-print_time();
+/* Value of the external crystal oscillator in Hz */
+#define HSE_VALUE ((uint32_t)12000000U)
 
 
-#endif  // DEVICE_H_
+/* SysTick devider */
+#define SYSTICKS ((uint32_t)1000U)
+
+
+#include <stdint.h>
+
+#include "stm32l0xx.h"
+#include "uaio.h"
+
+
+// void
+// delay_ms(uint32_t ms);
+//
+//
+// void
+// delay_s(uint32_t s);
+
+
+ASYNC
+clock_init(struct uaio_task *self);
+
+
+#endif  // CLOCK_H_

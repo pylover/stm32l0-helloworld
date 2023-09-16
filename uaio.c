@@ -20,6 +20,7 @@
 
 #include <clog.h>
 
+#include "stm32l0xx.h"
 #include "uaio.h"
 #include "device.h"
 
@@ -138,7 +139,7 @@ TIM2_IRQHandler() {
         return;
     }
 
-	TIM2->SR = ~TIM_SR_UIF;
+    TIM2->SR = ~TIM_SR_UIF;
     TIM2->CR1 &= ~TIM_CR1_CEN;
     timer1->status = UAIO_RUNNING;
     timer1 = NULL;
