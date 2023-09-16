@@ -148,4 +148,3 @@ print_date(bool newline) {
            (int) ((tr & RTC_DR_DU) >> RTC_DR_DU_Pos),
            newline? '\n': ' ');
 }
-

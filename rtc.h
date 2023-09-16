@@ -31,6 +31,10 @@ void
 print_date(bool newline);
 
 
+void
+print_time();
+
+
 #endif  // RTC_H_
 
 

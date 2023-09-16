@@ -24,8 +24,4 @@ void
 device_init();
 
 
-void
-print_time();
-
-
 #endif  // DEVICE_H_
