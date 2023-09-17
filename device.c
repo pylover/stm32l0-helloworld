@@ -18,9 +18,9 @@
  */
 #include <stdio.h>
 
+#include "clock.h"
 #include "stm32l0xx.h"
 #include "clog.h"
-#include "clock.h"
 #include "uart.h"
 #include "uaio.h"
 #include "device.h"
@@ -52,4 +52,32 @@ device_init(struct uaio_task *self) {
     usart2_init();
 
     CORO_FINALLY;
+}
+
+
+void
+device_standby() {
+    /*
+     * WFI (Wait for Interrupt) or WFE (Wait for Event) while:
+     * – SLEEPDEEP = 1 in Cortex®-M0+ System Control register
+     * – PDDS = 1 bit in Power Control register (PWR_CR)
+     * – No interrupt (for WFI) or event (for WFE) is pending.
+     * – WUF = 0 bit in Power Control/Status register (PWR_CSR)
+     * – the RTC flag corresponding to the chosen wakeup source (RTC Alarm A,
+     * RTC Alarm B, RTC wakeup, Tamper or Time-stamp flags) is cleared
+     */
+
+    DEBUG("Entering standby");
+
+    // DBGMCU->CR |= DBGMCU_CR_DBG_SLEEP;
+    DBGMCU->CR |= DBGMCU_CR_DBG_STANDBY;
+
+    // SCB->SCR |= SCB_SCR_SLEEPONEXIT_Msk;
+    SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
+
+    PWR->CR |= PWR_CR_PDDS;
+    PWR->CR |= PWR_CR_CWUF;
+    while ((PWR->CSR & PWR_CSR_WUF) != 0) {}
+    RTC->ISR &= ~RTC_ISR_WUTF;
+    __WFI();
 }

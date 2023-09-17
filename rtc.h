@@ -35,6 +35,10 @@ void
 print_time();
 
 
+void
+rtc_autowakup_init();
+
+
 #endif  // RTC_H_
 
 

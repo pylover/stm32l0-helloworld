@@ -20,18 +20,16 @@
 #define CLOCK_H_
 
 
+#include <stdint.h>
+
+
 extern volatile uint32_t ticks_ms;
-
-
-/* Value of the external crystal oscillator in Hz */
-#define HSE_VALUE ((uint32_t)12000000U)
 
 
 /* SysTick devider */
 #define SYSTICKS ((uint32_t)1000U)
 
 
-#include <stdint.h>
 
 #include "stm32l0xx.h"
 #include "uaio.h"

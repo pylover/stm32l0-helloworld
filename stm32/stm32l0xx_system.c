@@ -20,6 +20,10 @@
 #include "stm32l0xx.h"
 
 
+/* Value of the external crystal oscillator in Hz */
+#define HSE_VALUE ((uint32_t)12000000U)
+
+
 #ifndef HSE_VALUE
   /* Value of the external oscillator in Hz */
   #define HSE_VALUE    ((uint32_t)8000000U)

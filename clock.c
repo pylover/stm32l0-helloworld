@@ -18,8 +18,8 @@
  */
 #include <stdio.h>
 
-#include "stm32l0xx.h"
 #include "clock.h"
+#include "stm32l0xx.h"
 #include "clog.h"
 // #include "uart.h"
 #include "uaio.h"

@@ -20,6 +20,8 @@
 #include <stdint.h>
 
 
+#include "clock.h"
+#include "stm32l0xx.h"
 #include "clog.h"
 #include "rtc.h"
 #include "device.h"
@@ -33,12 +35,14 @@ startA(struct uaio_task *self) {
     INFO("Initializing...");
     CORO_WAIT(device_init, NULL);
 
+    rtc_autowakup_init();
     INFO("Starting...");
 
     while (1) {
         CORO_WAIT(sleepA, &sleep);
         print_date(false);
         print_time();
+        // device_standby();
     }
 
     CORO_FINALLY;

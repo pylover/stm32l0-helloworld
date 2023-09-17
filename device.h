@@ -24,4 +24,8 @@ void
 device_init();
 
 
+void
+device_standby();
+
+
 #endif  // DEVICE_H_

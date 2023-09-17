@@ -80,10 +80,11 @@ rtc_init() {
     RTC->CR &= ~RTC_CR_COSEL;
     while ((RTC->ISR & RTC_ISR_RECALPF) == RTC_ISR_RECALPF) {}
     RTC->CALR |= RTC_CALR_CALP;
-    RTC->CALR |= 0xFF;
+    // RTC->CALR |= 0xAF;
+    // RTC->CALR &= 0x0;
     // RTC->CALR |= RTC_CALR_CALW8;
     // RTC->CALR |= RTC_CALR_CALW16;
-    // RTC->CALR &= ~RTC_CALR_CALM;
+    RTC->CALR &= ~RTC_CALR_CALM;
 
     /* Enable RTC register write protection. */
     RTC->WPR = 0xFE;
@@ -176,7 +177,7 @@ rtc_autowakup_init() {
     // RTC->CR |= 0;
 
     /* Program the value into the wakeup timer. */
-    RTC->WUTR = 0xFFFF;
+    RTC->WUTR = 0x8;
 
     /* Enable wake up counter and wake up interrupt. */
     RTC->CR = RTC_CR_WUTE | RTC_CR_WUTIE;
@@ -184,4 +185,19 @@ rtc_autowakup_init() {
     /* Enable RTC register write protection. */
     RTC->WPR = 0xFE;
     RTC->WPR = 0x64;
+
+    /*
+     RTC auto-wakeup (AWU) from the Standby mode
+     - To wake up from the Standby mode with an RTC alarm event, it is necessary to:
+     a)Enable the RTC Alarm interrupt in the RTC_CR register
+     b)Configure the RTC to generate the RTC alarm
+     - To wake up from the Stop mode with an RTC Tamper or time stamp event, it is
+     necessary to:
+     a)Enable the RTC TimeStamp Interrupt in the RTC_CR register or the RTC Tamper
+     Interrupt in the RTC_TCR register
+     b)Configure the RTC to detect the tamper or time stamp event
+     - To wake up from the Stop mode with an RTC Wakeup event, it is necessary to:
+     a)Enable the RTC Wakeup Interrupt in the RTC_CR registe
+     b)Configure the RTC to generate the RTC Wakeup event
+     */
 }
