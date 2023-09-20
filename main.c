@@ -50,8 +50,8 @@ startA(struct uaio_task *self) {
         print_date(false);
         print_time();
 
-        CORO_WAIT(usart2_sendA, &usart2);
-        // device_standby();
+        // CORO_WAIT(usart2_sendA, &usart2);
+        device_standby();
     }
 
     CORO_FINALLY;
