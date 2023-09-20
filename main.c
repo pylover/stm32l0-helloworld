@@ -32,11 +32,11 @@
 static ASYNC
 startA(struct uaio_task *self) {
     static struct uaio_sleep sleep = {2000};
-    static struct usart usart2 = {
-        .send = "hello\n",
-        .sendlen = 6,
+    // static struct usart usart2 = {
+    //     .send = "hello\n",
+    //     .sendlen = 6,
 
-    };
+    // };
 
     CORO_START;
     INFO("Initializing...");
