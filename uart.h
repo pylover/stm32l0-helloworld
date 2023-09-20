@@ -20,8 +20,21 @@
 #define UART_H_
 
 
+#include "uaio.h"
+
+
+struct usart {
+    const char *send;
+    unsigned short sendlen;
+};
+
+
 void
 usart2_init();
+
+
+ASYNC
+usart2_sendA(struct uaio_task *self, struct usart *state);
 
 
 #endif  // UART_H_

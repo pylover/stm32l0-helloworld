@@ -211,7 +211,6 @@ clock_init(struct uaio_task *self) {
     /* AHB */
     RCC->AHBENR &= ~RCC_AHBENR_CRYPEN;
     RCC->AHBENR &= ~RCC_AHBENR_CRCEN;
-    RCC->AHBENR |= RCC_AHBENR_DMAEN;
 
     /* Bits 7:4 HPRE[3:0]: AHB prescaler
      * 0xxx: SYSCLK not divided

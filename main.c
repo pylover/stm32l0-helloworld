@@ -25,12 +25,19 @@
 #include "clog.h"
 #include "rtc.h"
 #include "device.h"
+#include "uart.h"
 #include "uaio.h"
 
 
 static ASYNC
 startA(struct uaio_task *self) {
     static struct uaio_sleep sleep = {2000};
+    static struct usart usart2 = {
+        .send = "hello\n",
+        .sendlen = 6,
+
+    };
+
     CORO_START;
     INFO("Initializing...");
     CORO_WAIT(device_init, NULL);
@@ -42,6 +49,8 @@ startA(struct uaio_task *self) {
         CORO_WAIT(sleepA, &sleep);
         print_date(false);
         print_time();
+
+        CORO_WAIT(usart2_sendA, &usart2);
         // device_standby();
     }
 

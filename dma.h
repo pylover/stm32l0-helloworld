@@ -21,6 +21,10 @@
 
 
 void
+dma_init();
+
+
+void
 dma_memory_to_peripheral_circular(volatile uint32_t *peripheral,
         const char *data, uint32_t count);
 

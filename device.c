@@ -21,6 +21,7 @@
 #include "clock.h"
 #include "stm32l0xx.h"
 #include "clog.h"
+#include "dma.h"
 #include "uart.h"
 #include "uaio.h"
 #include "device.h"
@@ -49,7 +50,12 @@ device_init(struct uaio_task *self) {
 #endif
 
     CORO_WAIT(clock_init, NULL);
+
+    DEBUG("Init USART2");
     usart2_init();
+
+    DEBUG("Init DMA");
+    dma_init();
 
     CORO_FINALLY;
 }

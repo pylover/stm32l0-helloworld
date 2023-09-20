@@ -21,6 +21,7 @@
 #include "stm32l0xx.h"
 
 #include "uart.h"
+#include "dma.h"
 
 
 /** USART2 initializer
@@ -42,7 +43,6 @@ usart2_init() {
     RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
 
     /* Oversampling
-
     Select oversampling by 8 (OVER8=1) to achieve higher speed (up to fCK/8).
     In this case the maximum receiver tolerance to clock deviation is reduced
 
@@ -80,14 +80,24 @@ usart2_init() {
     /* Word length: 00: 1 Start bit, 8 data bits, n stop bits */
     USART2->CR1 &= ~(USART_CR1_M1 | USART_CR1_M0);
 
+    uint32_t baud_rate = 115200;
+    uint16_t uartdiv = system_clock / baud_rate;
+    USART2->BRR = (((uartdiv / 16) << USART_BRR_DIV_MANTISSA_Pos) |
+        ((uartdiv % 16) << USART_BRR_DIV_FRACTION_Pos));
+
     /* Enable the USART2 */
-    USART2->CR1 = USART_CR1_UE;
+    USART2->CR1 = USART_CR1_TE | USART_CR1_UE;
 
     // dma_memory_to_peripheral_circular(&USART1->TDR, msg, strlen(msg));
-    // // TODO:
-    // /* Enable the channel */
-    // //DMA1_CH3->CCR |= DMA_CCR_EN;
+}
 
-    // /* Enable DMA mode for transmitter */
-    // //USART1->CR3 |= USART_CR3_DMAT;
+
+ASYNC
+usart2_sendA(struct uaio_task *self, struct usart *state) {
+    CORO_START;
+
+    dma_memory_to_peripheral_circular(&USART1->TDR, state->send,
+            state->sendlen);
+
+    CORO_FINALLY;
 }
