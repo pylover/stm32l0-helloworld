@@ -51,7 +51,7 @@ rtc_init() {
     RCC->CSR |= RCC_CSR_RTCEN;
 
     /* Enter to initialization mode */
-    RTC->ISR = RTC_ISR_INIT;
+    RTC->ISR |= RTC_ISR_INIT;
 
     /* Wait to enter initialization mode, 2 RTC clocks */
     while ((RTC->ISR & RTC_ISR_INITF) != RTC_ISR_INITF) {}
@@ -63,8 +63,8 @@ rtc_init() {
     RTC->PRER |= 0xffUL << RTC_PRER_PREDIV_S_Pos;
 
     /* Set initial date and time */
-    RTC->TR = 0;
-    RTC->DR = 0;
+    // RTC->TR = 0;
+    // RTC->DR = 0;
 
     /* 24 Hours style
      * 0: 24 hour/day format
@@ -177,8 +177,11 @@ rtc_autowakup_init() {
     // RTC->CR |= 0;
 
     /* Program the value into the wakeup timer. */
-    RTC->WUTR = 0x8;
-
+    RTC->WUTR = 0xa;
+    
+    /* RTC_ALARM output = Wake up timer */
+    RTC->CR |= RTC_CR_OSEL;
+    
     /* Enable wake up counter and wake up interrupt. */
     RTC->CR = RTC_CR_WUTE | RTC_CR_WUTIE;
 

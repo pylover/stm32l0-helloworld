@@ -51,11 +51,11 @@ device_init(struct uaio_task *self) {
 
     CORO_WAIT(clock_init, NULL);
 
-    DEBUG("Init USART2");
-    usart2_init();
+    // DEBUG("Init USART2");
+    // usart2_init();
 
-    DEBUG("Init DMA");
-    dma_init();
+    // DEBUG("Init DMA");
+    // dma_init();
 
     CORO_FINALLY;
 }
@@ -86,4 +86,5 @@ device_standby() {
     while ((PWR->CSR & PWR_CSR_WUF) != 0) {}
     RTC->ISR &= ~RTC_ISR_WUTF;
     __WFI();
+    ERROR("device didn't went to standby mode");
 }
