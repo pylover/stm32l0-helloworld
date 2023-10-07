@@ -65,7 +65,7 @@ config_rtc_raw() {
     RCC->APB1ENR |= RCC_APB1ENR_PWREN;
 
     /* Select the RTC clock source: LSE oscillator */
-    RCC->CSR |= RCC_CSR_RTCSEL_LSE; 
+    RCC->CSR |= RCC_CSR_RTCSEL_LSE;
     /* Enable the interal LSE oscillator */
     RCC->CSR |= RCC_CSR_LSEON;
 
@@ -81,12 +81,13 @@ config_rtc_raw() {
     }
 
     /* Wake up value reload counter [s] */
-    RTC->WUTR = 0xb;
+    RTC->WUTR = 0x5;
 
     /* OSEL = 0x3 -> RTC_ALARM output = Wake up timer */
     RTC->CR |= RTC_CR_OSEL;
     /* WUCKSEL = 0x4 -> RTC Timer [1s - 18h] */
     RTC->CR |= RTC_CR_WUCKSEL_2;
+    // RTC->CR &= ~RTC_CR_WUCKSEL;
     /* Enable wake up counter/interrupt */
     RTC->CR |= RTC_CR_WUTE | RTC_CR_WUTIE;
 
@@ -113,7 +114,8 @@ startA(struct uaio_task *self) {
     CORO_WAIT(device_init, NULL);
 
     // config_rtc_raw();
-    rtc_autowakup_init();
+    // rtc_autowakup_init();
+    com_rtc_autowakup_init();
     INFO("Starting...");
 
     while (1) {

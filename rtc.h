@@ -39,6 +39,9 @@ void
 rtc_autowakup_init();
 
 
+void
+com_rtc_autowakup_init();
+
 #endif  // RTC_H_
 
 

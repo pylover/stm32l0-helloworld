@@ -178,16 +178,76 @@ rtc_autowakup_init() {
 
     /* Program the value into the wakeup timer. */
     RTC->WUTR = 0xa;
-    
+
     /* RTC_ALARM output = Wake up timer */
     RTC->CR |= RTC_CR_OSEL;
-    
+
     /* Enable wake up counter and wake up interrupt. */
     RTC->CR = RTC_CR_WUTE | RTC_CR_WUTIE;
 
     /* Enable RTC register write protection. */
     RTC->WPR = 0xFE;
     RTC->WPR = 0x64;
+
+    /*
+     RTC auto-wakeup (AWU) from the Standby mode
+     - To wake up from the Standby mode with an RTC alarm event, it is necessary to:
+     a)Enable the RTC Alarm interrupt in the RTC_CR register
+     b)Configure the RTC to generate the RTC alarm
+     - To wake up from the Stop mode with an RTC Tamper or time stamp event, it is
+     necessary to:
+     a)Enable the RTC TimeStamp Interrupt in the RTC_CR register or the RTC Tamper
+     Interrupt in the RTC_TCR register
+     b)Configure the RTC to detect the tamper or time stamp event
+     - To wake up from the Stop mode with an RTC Wakeup event, it is necessary to:
+     a)Enable the RTC Wakeup Interrupt in the RTC_CR registe
+     b)Configure the RTC to generate the RTC Wakeup event
+     */
+}
+
+
+void
+com_rtc_autowakup_init() {
+    PWR->CR |= PWR_CR_DBP;
+    PWR->CR |= PWR_CR_CWUF;
+    /* reset RTC */
+    /* Disable the RTC register write protection. */
+    RTC->WPR = 0xCA;
+    RTC->WPR = 0x53;
+    /* Disable the wakeup timer. */
+    RTC->CR &= ~RTC_CR_WUTE;
+
+    /* Ensure access to Wakeup auto-reload counter and bits WUCKSEL[2:0] is
+       allowed. */
+    while (RTC->ISR & RTC_ISR_WUTWF) {}
+
+    /* WUCKSEL[2:0]: Wakeup clock selection
+     * 000: RTC/16 clock is selected
+     * 001: RTC/8 clock is selected
+     * 010: RTC/4 clock is selected
+     * 011: RTC/2 clock is selected
+     * 10x: ck_spre (usually 1 Hz) clock is selected
+     * 11x: ck_spre (usually 1 Hz) clock is selected and 216 is added to the
+            WUT counter value
+     */
+    // RTC->CR |= 0;
+
+    /* Program the value into the wakeup timer. */
+    RTC->WUTR = 0x1;
+
+    /* RTC_ALARM output = Wake up timer */
+    RTC->CR |= RTC_CR_OSEL;
+
+    // RTC->CR &= ~RTC_CR_WUCKSEL;
+    RTC->CR |= RTC_CR_WUCKSEL_2;
+    /* Enable wake up counter and wake up interrupt. */
+    RTC->CR = RTC_CR_WUTE | RTC_CR_WUTIE;
+
+    /* Enable RTC register write protection. */
+    RTC->WPR = 0xFE;
+    RTC->WPR = 0x64;
+
+    RCC->CSR |= RCC_CSR_RTCEN;
 
     /*
      RTC auto-wakeup (AWU) from the Standby mode
