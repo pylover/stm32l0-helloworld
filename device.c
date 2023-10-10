@@ -51,11 +51,11 @@ device_init(struct uaio_task *self) {
 
     CORO_WAIT(clock_init, NULL);
 
-    DEBUG("Init USART2");
-    usart2_init();
+    // DEBUG("Init USART2");
+    // usart2_init();
 
-    DEBUG("Init DMA");
-    dma_init();
+    // DEBUG("Init DMA");
+    // dma_init();
 
     CORO_FINALLY;
 }
@@ -76,6 +76,8 @@ device_standby() {
     DEBUG("Entering standby");
 
     // DBGMCU->CR |= DBGMCU_CR_DBG_SLEEP;
+
+    /* Enable debuging in standby mode */
     DBGMCU->CR |= DBGMCU_CR_DBG_STANDBY;
 
     // SCB->SCR |= SCB_SCR_SLEEPONEXIT_Msk;
