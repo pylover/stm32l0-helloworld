@@ -76,6 +76,7 @@ device_standby() {
     DEBUG("Entering standby");
 
     // DBGMCU->CR |= DBGMCU_CR_DBG_SLEEP;
+    /* Enable debuggin in standby mode */
     DBGMCU->CR |= DBGMCU_CR_DBG_STANDBY;
 
     // SCB->SCR |= SCB_SCR_SLEEPONEXIT_Msk;
