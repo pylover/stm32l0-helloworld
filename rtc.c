@@ -51,7 +51,7 @@ rtc_init() {
     RCC->CSR |= RCC_CSR_RTCEN;
 
     /* Enter to initialization mode */
-    RTC->ISR = RTC_ISR_INIT;
+    RTC->ISR |= RTC_ISR_INIT;
 
     /* Wait to enter initialization mode, 2 RTC clocks */
     while ((RTC->ISR & RTC_ISR_INITF) != RTC_ISR_INITF) {}
@@ -153,6 +153,12 @@ print_date(bool newline) {
 
 void
 rtc_autowakup_init() {
+    /* Disable backup protection for register*/
+    PWR->CR |= PWR_CR_DBP;
+
+    /* Clear wakeup timer flag */
+    PWR->CR |= PWR_CR_CWUF;
+
     /* Disable the RTC register write protection. */
     RTC->WPR = 0xCA;
     RTC->WPR = 0x53;
@@ -162,7 +168,7 @@ rtc_autowakup_init() {
 
     /* Ensure access to Wakeup auto-reload counter and bits WUCKSEL[2:0] is
        allowed. */
-    while (RTC->ISR & RTC_ISR_WUTWF) {}
+    while((RTC->ISR & RTC_ISR_WUTWF) != RTC_ISR_WUTWF) {}
 
     /* WUCKSEL[2:0]: Wakeup clock selection
      * 000: RTC/16 clock is selected
@@ -173,14 +179,13 @@ rtc_autowakup_init() {
      * 11x: ck_spre (usually 1 Hz) clock is selected and 216 is added to the
             WUT counter value
      */
-    RTC->CR &= ~RTC_CR_WUCKSEL;
-    // RTC->CR |= 0;
+    RTC->CR |= RTC_CR_WUCKSEL_2;
 
     /* Program the value into the wakeup timer. */
     RTC->WUTR = 0x8;
 
     /* Enable wake up counter and wake up interrupt. */
-    RTC->CR = RTC_CR_WUTE | RTC_CR_WUTIE;
+    RTC->CR |= RTC_CR_WUTE | RTC_CR_WUTIE;
 
     /* Enable RTC register write protection. */
     RTC->WPR = 0xFE;
