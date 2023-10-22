@@ -74,8 +74,8 @@ usart2_init() {
     /* Select alternate functions of PA2 and PA3 */
     GPIOA->AFRL &= ~(GPIO_AFRL_AFSEL2_Msk | GPIO_AFRL_AFSEL3_Msk);
     GPIOA->AFRL |=
-        GPIOA_AFRL_AFSEL2_AF2_USART2_TX |
-        GPIOA_AFRL_AFSEL3_AF2_USART2_RX;
+        GPIOA_AFRL_AFSEL2_AF4_USART2_TX |
+        GPIOA_AFRL_AFSEL3_AF4_USART2_RX;
 
     /* Word length: 00: 1 Start bit, 8 data bits, n stop bits */
     USART2->CR1 &= ~(USART_CR1_M1 | USART_CR1_M0);
@@ -96,7 +96,7 @@ ASYNC
 usart2_sendA(struct uaio_task *self, struct usart *state) {
     CORO_START;
 
-    dma_memory_to_peripheral_circular(&USART1->TDR, state->send,
+    dma_memory_to_peripheral_circular(&USART2->TDR, state->send,
             state->sendlen);
 
     CORO_FINALLY;
