@@ -25,12 +25,12 @@
 void
 dma_init() {
     RCC->AHBENR |= RCC_AHBENR_DMA1EN;
-    
+
     NVIC_SetPriority(DMA1_Channel4_5_IRQn, 0);
     NVIC_EnableIRQ(DMA1_Channel4_5_IRQn);
 
-    DMA1_CSELR->CSELR &= ~DMA_CSELR_C4S;
-    DMA1_CSELR->CSELR = 4 << DMA_CSELR_C4S_Pos;
+    /* DMA channel 4 selection */
+    DMA1_CSELR->CSELR |= DMA_CSELR_C4S;
 }
 
 
@@ -56,6 +56,12 @@ DMA1_Channel4_5_IRQHandler() {
 void
 dma_memory_to_peripheral_circular(volatile uint32_t *peripheral,
         const char *data, uint32_t count) {
+    /* Disable DMA */
+    DMA1_CH4->CCR &= ~DMA_CCR_EN;
+
+    /* clear interrupt flags  */
+    DMA1->IFCR |= (DMA_IFCR_CHTIF4 | DMA_IFCR_CGIF4 | DMA_IFCR_CTCIF4);
+
     /* Configure the channel priority to medium level */
     /*
     00: low

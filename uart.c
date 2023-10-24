@@ -32,8 +32,8 @@ void
 usart2_init() {
     /*
     USART2 pins
-    RX,     pin 12, PA2, APB1
-    TX,     pin 13, PA3, APB1
+    TX,     pin 12, PA2, APB1
+    RX,     pin 13, PA3, APB1
     Wakeup, pin 10, PA0
     */
     // const char * msg = "Hello\r\n";
@@ -41,16 +41,6 @@ usart2_init() {
     /* Enable clock for GPIOA and USART1 */
     RCC->IOPENR |= RCC_IOPENR_IOPAEN;
     RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
-
-    /* Oversampling
-    Select oversampling by 8 (OVER8=1) to achieve higher speed (up to fCK/8).
-    In this case the maximum receiver tolerance to clock deviation is reduced
-
-    Select oversampling by 16 (OVER8=0) to increase the tolerance of the
-    receiver to clock deviations. In this case, the maximum speed is limited
-    to maximum fCK/16 where fCK is the clock source frequency.
-    */
-    USART2->CR1 |= USART_CR1_OVER8;
 
     /* Clock configuration register (RCC_CCIPR)
     USART2SEL: USART2 clock source selection bits
@@ -71,24 +61,51 @@ usart2_init() {
     /* Select alternate function mode for PA2 and PA3 */
     GPIOA->MODER |= GPIO_MODER_MODE2_1 | GPIO_MODER_MODE3_1;
 
-    /* Select alternate functions of PA2 and PA3 */
+    /* Select alternate functions 4 of PA2 and PA3 */
     GPIOA->AFRL &= ~(GPIO_AFRL_AFSEL2_Msk | GPIO_AFRL_AFSEL3_Msk);
     GPIOA->AFRL |=
         GPIOA_AFRL_AFSEL2_AF4_USART2_TX |
         GPIOA_AFRL_AFSEL3_AF4_USART2_RX;
 
+    /* Disable USART2 */
+    USART2->CR1 &= ~USART_CR1_UE;
+
+    /* Clear control register values */
+    USART2->CR1 = 0x0U;
+    USART2->CR2 = 0x0U;
+    USART2->CR3 = 0x0U;
+
+    /* CR1 configuration */
     /* Word length: 00: 1 Start bit, 8 data bits, n stop bits */
     USART2->CR1 &= ~(USART_CR1_M1 | USART_CR1_M0);
 
+    /* Enable USART2 Transmitter */
+    USART2->CR1 |= USART_CR1_TE;
+
+    /* Oversampling
+    Select oversampling by 8 (OVER8=1) to achieve higher speed (up to fCK/8).
+    In this case the maximum receiver tolerance to clock deviation is reduced
+
+    Select oversampling by 16 (OVER8=0) to increase the tolerance of the
+    receiver to clock deviations. In this case, the maximum speed is limited
+    to maximum fCK/16 where fCK is the clock source frequency.
+    */
+    USART2->CR1 |= USART_CR1_OVER8;
+
+    /* Clear transfer complete flag */
+    USART2->ICR &= ~USART_ICR_TCCF;
+
+    /* Enable DMA Transmitter */
+    USART2->CR3 |= USART_CR3_DMAT;
+
+    /* BRR register configuration */
     uint32_t baud_rate = 115200;
     uint16_t uartdiv = system_clock / baud_rate;
     USART2->BRR = (((uartdiv / 16) << USART_BRR_DIV_MANTISSA_Pos) |
-        ((uartdiv % 16) << USART_BRR_DIV_FRACTION_Pos));
+            ((uartdiv % 16) << USART_BRR_DIV_FRACTION_Pos));
 
-    /* Enable the USART2 */
-    USART2->CR1 = USART_CR1_TE | USART_CR1_UE;
-
-    // dma_memory_to_peripheral_circular(&USART1->TDR, msg, strlen(msg));
+    /* Enable USART2 */
+    USART2->CR1 |= USART_CR1_UE;
 }
 
 
