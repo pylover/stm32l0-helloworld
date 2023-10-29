@@ -51,11 +51,11 @@ device_init(struct uaio_task *self) {
 
     CORO_WAIT(clock_init, NULL);
 
-    DEBUG("Init USART2");
-    usart2_init();
-
     DEBUG("Init DMA");
     dma_init();
+
+    DEBUG("Init USART2");
+    usart2_init();
 
     CORO_FINALLY;
 }
