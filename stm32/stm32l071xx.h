@@ -6494,7 +6494,7 @@ typedef struct
 #define AES_RNG_LPUART1_IRQHandler     LPUART1_IRQHandler
 #define TIM6_DAC_IRQHandler            TIM6_IRQHandler
 #define RCC_CRS_IRQHandler             RCC_IRQHandler
-#define DMA1_Channel4_5_IRQHandler     DMA1_Channel4_5_6_7_IRQHandler
+#define DMA1_Channel4_5_IRQHandler     DMA1_Channel4_7_IRQHandler
 #define ADC1_IRQHandler                ADC1_COMP_IRQHandler
 
 /**

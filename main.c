@@ -33,8 +33,8 @@ static ASYNC
 startA(struct uaio_task *self) {
     static struct uaio_sleep sleep = {2000};
     static struct usart usart2 = {
-        .send = "hello\n",
-        .sendlen = 6,
+        .send = "hello\r\n",
+        .sendlen = 7,
     };
 
     CORO_START;
@@ -50,7 +50,7 @@ startA(struct uaio_task *self) {
         print_time();
 
         CORO_WAIT(usart2_sendA, &usart2);
-        
+
         /* device_standby commented for now to test uart dma */
         // device_standby();
     }
