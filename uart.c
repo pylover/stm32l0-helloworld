@@ -92,9 +92,7 @@ usart2_init() {
 
     /* BRR register configuration */
     uint32_t baud_rate = 115200;
-    uint16_t uartdiv = system_clock / baud_rate;
-    USART2->BRR = (((uartdiv / 16) << USART_BRR_DIV_MANTISSA_Pos) |
-            ((uartdiv % 16) << USART_BRR_DIV_FRACTION_Pos));
+    USART2->BRR = (uint32_t) system_clock / baud_rate;
 
     /* Enable USART2 Transmitter */
     USART2->CR1 |= USART_CR1_TE;
