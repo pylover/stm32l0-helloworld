@@ -53,7 +53,7 @@ DMA1_Channel4_7_IRQHandler() {
     }
 
     /* Full transfer */
-	if (DMA1->ISR & DMA_ISR_TCIF4) {
+    if (DMA1->ISR & DMA_ISR_TCIF4) {
         /* Disable DMA interrupt flags */
         DMA1->IFCR |=  DMA_IFCR_CTCIF4;
 
