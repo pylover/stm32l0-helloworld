@@ -2628,6 +2628,10 @@ typedef struct
 #define GPIOA_AFRL_AFSEL2_AF2_USART2_TX  (GPIO_AF2 << GPIO_AFRL_AFSEL2_Pos)
 #define GPIOA_AFRL_AFSEL3_AF2_USART2_RX  (GPIO_AF2 << GPIO_AFRL_AFSEL3_Pos)
 
+#define GPIO_AF4                         (0x4UL)
+#define GPIOA_AFRL_AFSEL2_AF4_USART2_TX  (GPIO_AF4 << GPIO_AFRL_AFSEL2_Pos)
+#define GPIOA_AFRL_AFSEL3_AF4_USART2_RX  (GPIO_AF4 << GPIO_AFRL_AFSEL3_Pos)
+
 /****************** Bit definition for GPIO_AFRH register ********************/
 #define GPIO_AFRH_AFSEL8_Pos             (0U)
 #define GPIO_AFRH_AFSEL8_Msk             (0xFUL << GPIO_AFRH_AFSEL8_Pos)          /*!< 0x0000000F */
@@ -6481,7 +6485,7 @@ typedef struct
 #define AES_RNG_LPUART1_IRQn           LPUART1_IRQn
 #define TIM6_DAC_IRQn                  TIM6_IRQn
 #define RCC_CRS_IRQn                   RCC_IRQn
-#define DMA1_Channel4_5_IRQn           DMA1_Channel4_5_6_7_IRQn
+// #define DMA1_Channel4_5_IRQn           DMA1_Channel4_5_6_7_IRQn
 #define ADC1_IRQn                      ADC1_COMP_IRQn
 
 /* Aliases for __IRQHandler */
@@ -6490,7 +6494,7 @@ typedef struct
 #define AES_RNG_LPUART1_IRQHandler     LPUART1_IRQHandler
 #define TIM6_DAC_IRQHandler            TIM6_IRQHandler
 #define RCC_CRS_IRQHandler             RCC_IRQHandler
-#define DMA1_Channel4_5_IRQHandler     DMA1_Channel4_5_6_7_IRQHandler
+// #define DMA1_Channel4_5_IRQHandler     DMA1_Channel4_7_IRQHandler
 #define ADC1_IRQHandler                ADC1_COMP_IRQHandler
 
 /**

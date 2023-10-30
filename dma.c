@@ -24,17 +24,21 @@
 
 void
 dma_init() {
-    // NVIC_SetPriority(DMA1_Channel2_3_IRQn, 0);
+    /* DMA1 clock enable */
     RCC->AHBENR |= RCC_AHBENR_DMA1EN;
-    NVIC_EnableIRQ(DMA1_Channel2_3_IRQn);
 
-    DMA1_CSELR->CSELR &= ~DMA_CSELR_C2S;
-    DMA1_CSELR->CSELR = 4 << DMA_CSELR_C2S_Pos;
+    /* DMA channel 4 selection */
+    DMA1_CSELR->CSELR &= ~DMA_CSELR_C4S;
+    DMA1_CSELR->CSELR |= (0x4U << DMA_CSELR_C4S_Pos);
+
+    /* DMA1 channel 4 to 7 interrupt callback enable */
+    NVIC_EnableIRQ(DMA1_Channel4_5_6_7_IRQn);
+    NVIC_SetPriority(DMA1_Channel4_5_6_7_IRQn, 0);
 }
 
 
 void
-DMA1_Channel2_3_IRQHandler() {
+DMA1_Channel4_7_IRQHandler() {
 	// if ((DMA1->ISR)&(1<<22))  // If the Half Transfer Complete Interrupt is set
 	// {
 	// 	memcpy (&MainBuf[indx], &RxBuf[0], RXSIZE/2);
@@ -43,18 +47,19 @@ DMA1_Channel2_3_IRQHandler() {
 	// 	if (indx>49) indx=0;
 	// }
 
-    DEBUG("Transfer completed");
-
     /* Full transfer */
-	if (DMA1->ISR & DMA_ISR_TCIF2) {
-		DMA1->IFCR |= DMA_ISR_TCIF2;
+	if (DMA1->ISR & DMA_ISR_TCIF4) {
+        DEBUG("Transfer completed");
+		DMA1->IFCR |= DMA_ISR_TCIF4;
 	}
-
 }
 
 void
 dma_memory_to_peripheral_circular(volatile uint32_t *peripheral,
         const char *data, uint32_t count) {
+    /* Disable DMA */
+    DMA1_CH4->CCR &= ~DMA_CCR_EN;
+
     /* Configure the channel priority to medium level */
     /*
     00: low
@@ -62,7 +67,7 @@ dma_memory_to_peripheral_circular(volatile uint32_t *peripheral,
     10: high
     11: very high
     */
-    DMA1_CH2->CCR &= ~(DMA_CCR_PL_1 | DMA_CCR_PL_1);
+    DMA1_CH4->CCR &= ~(DMA_CCR_PL_1 | DMA_CCR_PL_0);
 
     /* Configure data transfer direction, peripheral & memory incremented
        mode, and peripheral & memory data size */
@@ -72,8 +77,8 @@ dma_memory_to_peripheral_circular(volatile uint32_t *peripheral,
     0: read from peripheral
     1: read from memory
     */
-    DMA1_CH2->CCR &= ~DMA_CCR_MEM2MEM;
-    DMA1_CH2->CCR |= DMA_CCR_DIR;
+    DMA1_CH4->CCR &= ~DMA_CCR_MEM2MEM;
+    DMA1_CH4->CCR |= DMA_CCR_DIR;
 
     /* Set the memory and pripheral write chunk size to one byte */
     /*
@@ -82,32 +87,38 @@ dma_memory_to_peripheral_circular(volatile uint32_t *peripheral,
     10: 32 bits
     11: reserved
     */
-    DMA1_CH2->CCR &= ~(DMA_CCR_MSIZE_0 | DMA_CCR_MSIZE_0);
-    DMA1_CH2->CCR &= ~(DMA_CCR_PSIZE_0 | DMA_CCR_PSIZE_0);
+    DMA1_CH4->CCR &= ~(DMA_CCR_MSIZE_1 | DMA_CCR_MSIZE_0);
+    DMA1_CH4->CCR &= ~(DMA_CCR_PSIZE_1 | DMA_CCR_PSIZE_0);
 
     /* Set memory address incement by one byte */
-    DMA1_CH2->CCR |= DMA_CCR_MINC;
+    DMA1_CH4->CCR |= DMA_CCR_MINC;
 
     /* Disable address incrementation on peripheral address */
-    DMA1_CH2->CCR &= ~DMA_CCR_PINC;
+    DMA1_CH4->CCR &= ~DMA_CCR_PINC;
 
     /* Enable circular mode */
-    DMA1_CH2->CCR |= DMA_CCR_CIRC;
+    DMA1_CH4->CCR |= DMA_CCR_CIRC;
 
     /* Enable interrpt after full transfer */
-    DMA1_CH2->CCR |= DMA_CCR_TCIE | DMA_CCR_TEIE | DMA_CCR_HTIE;
+    DMA1_CH4->CCR |= DMA_CCR_TCIE | DMA_CCR_TEIE | DMA_CCR_HTIE;
 
-    /* Set USART1 TX data register address into DMA Channel 4 */
-    DMA1_CH2->CPAR = (uint32_t)peripheral;
+    /* clear interrupt flags  */
+    DMA1->IFCR |= (DMA_IFCR_CHTIF4 | DMA_IFCR_CGIF4 | DMA_IFCR_CTCIF4);
+
+    /* Set USART2 TX data register address into DMA Channel 4 */
+    DMA1_CH4->CPAR = (uint32_t)peripheral;
 
     /* Set pointer to data to be sent */
-    DMA1_CH2->CMAR = (uint32_t)data;
+    DMA1_CH4->CMAR = (uint32_t)data;
 
     /* Set size of data to be sent */
-    DMA1_CH2->CNDTR = count;
+    DMA1_CH4->CNDTR = count;
 
-    /* Enable DMA channel 2 */
-    DMA1_CH2->CCR |= DMA_CCR_EN;
+    /* Enable DMA channel 4 */
+    DMA1_CH4->CCR |= DMA_CCR_EN;
+
+    /* Enable USART2 to request from DMA*/
+    USART2->CR1 |= USART_CR1_UE;
 
     DEBUG("Sending: %.*s", count, data);
 }

@@ -32,25 +32,15 @@ void
 usart2_init() {
     /*
     USART2 pins
-    RX,     pin 12, PA2, APB1
-    TX,     pin 13, PA3, APB1
+    TX,     pin 12, PA2, APB1
+    RX,     pin 13, PA3, APB1
     Wakeup, pin 10, PA0
     */
     // const char * msg = "Hello\r\n";
 
-    /* Enable clock for GPIOA and USART1 */
+    /* Enable clock for GPIOA and USART2 */
     RCC->IOPENR |= RCC_IOPENR_IOPAEN;
     RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
-
-    /* Oversampling
-    Select oversampling by 8 (OVER8=1) to achieve higher speed (up to fCK/8).
-    In this case the maximum receiver tolerance to clock deviation is reduced
-
-    Select oversampling by 16 (OVER8=0) to increase the tolerance of the
-    receiver to clock deviations. In this case, the maximum speed is limited
-    to maximum fCK/16 where fCK is the clock source frequency.
-    */
-    USART2->CR1 |= USART_CR1_OVER8;
 
     /* Clock configuration register (RCC_CCIPR)
     USART2SEL: USART2 clock source selection bits
@@ -64,31 +54,51 @@ usart2_init() {
 
     /* TODO: USART2 clock enable during Sleep mode bit */
     /* RCC_APB1SMENR: Bit 17 USART2SMEN */
+    GPIOA->MODER &= ~GPIO_MODER_MODE2;
 
-    /* Reset mode configuration bits for PA2 and PA3 */
-    GPIOA->MODER &= ~(GPIO_MODER_MODE2 | GPIO_MODER_MODE3);
+    /* Push/Pull mode for PA2 */
+    GPIOA->OTYPER &= ~GPIO_OTYPER_OT_2;
+
+    /* High speed mode for PA2 */
+    GPIOA->OSPEEDR &= ~GPIO_OSPEEDER_OSPEED2;
 
     /* Select alternate function mode for PA2 and PA3 */
-    GPIOA->MODER |= GPIO_MODER_MODE2_1 | GPIO_MODER_MODE3_1;
+    GPIOA->MODER |= GPIO_MODER_MODE2_1;
 
-    /* Select alternate functions of PA2 and PA3 */
-    GPIOA->AFRL &= ~(GPIO_AFRL_AFSEL2_Msk | GPIO_AFRL_AFSEL3_Msk);
-    GPIOA->AFRL |=
-        GPIOA_AFRL_AFSEL2_AF2_USART2_TX |
-        GPIOA_AFRL_AFSEL3_AF2_USART2_RX;
+    /* Select speed for PA2 */
+    GPIOA->OSPEEDR |= GPIO_OSPEEDER_OSPEED2_1;
 
+    /* Alternate function selection for PA2 */
+    GPIOA->AFRL &= ~GPIO_AFRL_AFSEL2_Msk;
+    GPIOA->AFRL |= GPIOA_AFRL_AFSEL2_AF4_USART2_TX;
+
+    /* Disable USART2 */
+    USART2->CR1 &= ~USART_CR1_UE;
+
+    /* CR1 configuration */
     /* Word length: 00: 1 Start bit, 8 data bits, n stop bits */
     USART2->CR1 &= ~(USART_CR1_M1 | USART_CR1_M0);
 
+    /* Oversampling
+    Select oversampling by 8 (OVER8=1) to achieve higher speed (up to fCK/8).
+    In this case the maximum receiver tolerance to clock deviation is reduced
+
+    Select oversampling by 16 (OVER8=0) to increase the tolerance of the
+    receiver to clock deviations. In this case, the maximum speed is limited
+    to maximum fCK/16 where fCK is the clock source frequency.
+    */
+    /* This will cause problem in BAUD rate selection, commented to be dealt later */
+    // USART2->CR1 |= USART_CR1_OVER8;
+
+    /* BRR register configuration */
     uint32_t baud_rate = 115200;
-    uint16_t uartdiv = system_clock / baud_rate;
-    USART2->BRR = (((uartdiv / 16) << USART_BRR_DIV_MANTISSA_Pos) |
-        ((uartdiv % 16) << USART_BRR_DIV_FRACTION_Pos));
+    USART2->BRR = (uint32_t) system_clock / baud_rate;
 
-    /* Enable the USART2 */
-    USART2->CR1 = USART_CR1_TE | USART_CR1_UE;
+    /* Enable USART2 Transmitter */
+    USART2->CR1 |= USART_CR1_TE;
 
-    // dma_memory_to_peripheral_circular(&USART1->TDR, msg, strlen(msg));
+    /* Enable USART2 DMA request */
+    USART2->CR3 |= USART_CR3_DMAT;
 }
 
 
@@ -96,7 +106,7 @@ ASYNC
 usart2_sendA(struct uaio_task *self, struct usart *state) {
     CORO_START;
 
-    dma_memory_to_peripheral_circular(&USART1->TDR, state->send,
+    dma_memory_to_peripheral_circular(&USART2->TDR, state->send,
             state->sendlen);
 
     CORO_FINALLY;
