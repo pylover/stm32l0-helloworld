@@ -39,13 +39,13 @@ dma_init() {
 
 void
 DMA1_Channel4_7_IRQHandler() {
-	// if ((DMA1->ISR)&(1<<22))  // If the Half Transfer Complete Interrupt is set
-	// {
-	// 	memcpy (&MainBuf[indx], &RxBuf[0], RXSIZE/2);
-	// 	DMA1->IFCR |= (1<<22);
-	// 	indx = indx+(RXSIZE/2);
-	// 	if (indx>49) indx=0;
-	// }
+    // if ((DMA1->ISR)&(1<<22))  // If the Half Transfer Complete Interrupt is set
+    // {
+    // 	memcpy (&MainBuf[indx], &RxBuf[0], RXSIZE/2);
+    // 	DMA1->IFCR |= (1<<22);
+    // 	indx = indx+(RXSIZE/2);
+    // 	if (indx>49) indx=0;
+    // }
 
     if (DMA1->ISR & DMA_ISR_HTIF4) {
         INFO("Half transfer");
@@ -64,7 +64,7 @@ DMA1_Channel4_7_IRQHandler() {
         USART2->CR1 &= ~USART_CR1_UE;
 
         DEBUG("Transfer completed");
-	}
+    }
 }
 
 void
@@ -134,5 +134,4 @@ dma_memory_to_peripheral_circular(volatile uint32_t *peripheral,
 
     /* Enable USART2 to request from DMA*/
     USART2->CR1 |= USART_CR1_UE;
-
 }
