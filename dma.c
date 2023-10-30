@@ -24,19 +24,21 @@
 
 void
 dma_init() {
+    /* DMA1 clock enable */
     RCC->AHBENR |= RCC_AHBENR_DMA1EN;
 
     /* DMA channel 4 selection */
     DMA1_CSELR->CSELR &= ~DMA_CSELR_C4S;
     DMA1_CSELR->CSELR |= (0x4U << DMA_CSELR_C4S_Pos);
 
-    NVIC_EnableIRQ(DMA1_Channel4_5_IRQn);
-    NVIC_SetPriority(DMA1_Channel4_5_IRQn, 0);
+    /* DMA1 channel 4 to 7 interrupt callback enable */
+    NVIC_EnableIRQ(DMA1_Channel4_5_6_7_IRQn);
+    NVIC_SetPriority(DMA1_Channel4_5_6_7_IRQn, 0);
 }
 
 
 void
-DMA1_Channel4_5_IRQHandler() {
+DMA1_Channel4_7_IRQHandler() {
 	// if ((DMA1->ISR)&(1<<22))  // If the Half Transfer Complete Interrupt is set
 	// {
 	// 	memcpy (&MainBuf[indx], &RxBuf[0], RXSIZE/2);
@@ -45,21 +47,16 @@ DMA1_Channel4_5_IRQHandler() {
 	// 	if (indx>49) indx=0;
 	// }
 
-    if (DMA1->ISR & DMA_CCR_HTIE) {
-        DEBUG("Half completed");
-    }
     /* Full transfer */
 	if (DMA1->ISR & DMA_ISR_TCIF4) {
         DEBUG("Transfer completed");
 		DMA1->IFCR |= DMA_ISR_TCIF4;
 	}
-
 }
 
 void
 dma_memory_to_peripheral_circular(volatile uint32_t *peripheral,
         const char *data, uint32_t count) {
-    INFO("Starting to send");
     /* Disable DMA */
     DMA1_CH4->CCR &= ~DMA_CCR_EN;
 
@@ -119,8 +116,6 @@ dma_memory_to_peripheral_circular(volatile uint32_t *peripheral,
 
     /* Enable DMA channel 4 */
     DMA1_CH4->CCR |= DMA_CCR_EN;
-
-    INFO("Before enabling uart");
 
     /* Enable USART2 to request from DMA*/
     USART2->CR1 |= USART_CR1_UE;
