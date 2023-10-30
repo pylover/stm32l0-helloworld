@@ -39,19 +39,32 @@ dma_init() {
 
 void
 DMA1_Channel4_7_IRQHandler() {
-	// if ((DMA1->ISR)&(1<<22))  // If the Half Transfer Complete Interrupt is set
-	// {
-	// 	memcpy (&MainBuf[indx], &RxBuf[0], RXSIZE/2);
-	// 	DMA1->IFCR |= (1<<22);
-	// 	indx = indx+(RXSIZE/2);
-	// 	if (indx>49) indx=0;
-	// }
+    // if ((DMA1->ISR)&(1<<22))  // If the Half Transfer Complete Interrupt is set
+    // {
+    // 	memcpy (&MainBuf[indx], &RxBuf[0], RXSIZE/2);
+    // 	DMA1->IFCR |= (1<<22);
+    // 	indx = indx+(RXSIZE/2);
+    // 	if (indx>49) indx=0;
+    // }
+
+    if (DMA1->ISR & DMA_ISR_HTIF4) {
+        INFO("Half transfer");
+        DMA1->IFCR |= DMA_IFCR_CHTIF4;
+    }
 
     /* Full transfer */
-	if (DMA1->ISR & DMA_ISR_TCIF4) {
+    if (DMA1->ISR & DMA_ISR_TCIF4) {
+        /* Disable DMA interrupt flags */
+        DMA1->IFCR |=  DMA_IFCR_CTCIF4;
+
+        /* Disable DMA */
+        DMA1_CH4->CCR &= ~DMA_CCR_EN;
+
+        /* Disable USART to stop requesting data from DMA */
+        USART2->CR1 &= ~USART_CR1_UE;
+
         DEBUG("Transfer completed");
-		DMA1->IFCR |= DMA_ISR_TCIF4;
-	}
+    }
 }
 
 void
@@ -100,10 +113,10 @@ dma_memory_to_peripheral_circular(volatile uint32_t *peripheral,
     DMA1_CH4->CCR |= DMA_CCR_CIRC;
 
     /* Enable interrpt after full transfer */
-    DMA1_CH4->CCR |= DMA_CCR_TCIE | DMA_CCR_TEIE | DMA_CCR_HTIE;
+    DMA1_CH4->CCR |= DMA_CCR_TCIE | DMA_CCR_HTIE;
 
     /* clear interrupt flags  */
-    DMA1->IFCR |= (DMA_IFCR_CHTIF4 | DMA_IFCR_CGIF4 | DMA_IFCR_CTCIF4);
+    DMA1->IFCR |= (DMA_IFCR_CHTIF4 | DMA_IFCR_CTCIF4);
 
     /* Set USART2 TX data register address into DMA Channel 4 */
     DMA1_CH4->CPAR = (uint32_t)peripheral;
@@ -117,8 +130,8 @@ dma_memory_to_peripheral_circular(volatile uint32_t *peripheral,
     /* Enable DMA channel 4 */
     DMA1_CH4->CCR |= DMA_CCR_EN;
 
+    DEBUG("Sending: %.*s", count, data);
+
     /* Enable USART2 to request from DMA*/
     USART2->CR1 |= USART_CR1_UE;
-
-    DEBUG("Sending: %.*s", count, data);
 }
