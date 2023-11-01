@@ -1,7 +1,7 @@
 ## TODO
-- Auto wakeup
-- Deep Sleep
-
+- Coap library
+- Json library
+- Crypto
 
 ## Backlog
 - UART & DMA: https://medium.com/@csrohit/working-with-usart-and-dma-in-stm32-arm-cortex-m3-6a0e8b3174f3
