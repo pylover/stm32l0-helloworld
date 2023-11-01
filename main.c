@@ -28,6 +28,35 @@
 #include "uart.h"
 #include "uaio.h"
 
+#include "lwjson/lwjson.h"
+
+
+/* LwJSON instance and tokens */
+static lwjson_token_t tokens[128];
+static lwjson_t lwjson;
+
+/* Parse JSON */
+static void
+json_example(void) {
+    lwjson_init(&lwjson, tokens, LWJSON_ARRAYSIZE(tokens));
+    if (lwjson_parse(&lwjson, "{\"foo\": \"bar\"}") == lwjsonOK) {
+        const lwjson_token_t* t;
+        printf("JSON parsed..\r\n");
+
+        /* Find custom key in JSON */
+        if ((t = lwjson_find(&lwjson, "foo")) != NULL) {
+            printf("Key found %.*s: %.*s\r\n",
+                    t->token_name_len,
+                    t->token_name,
+                    t->u.str.token_value_len,
+                    t->u.str.token_value);
+        }
+
+        /* Call this when not used anymore */
+        lwjson_free(&lwjson);
+    }
+}
+
 
 static ASYNC
 startA(struct uaio_task *self) {
@@ -45,6 +74,10 @@ startA(struct uaio_task *self) {
     INFO("Starting...");
 
     while (1) {
+
+        /* JSON example */
+        json_example();
+
         /* sleep example */
         CORO_WAIT(sleepA, &sleep);
 

@@ -94,6 +94,9 @@ target_link_options(${CMAKE_PROJECT_NAME}
     PRIVATE 
     "LINKER:--no-warn-rwx-segments"
 )
+target_link_libraries(${CMAKE_PROJECT_NAME} lwjson)
+# target_link_libraries(${CMAKE_PROJECT_NAME} lwjson_debug)
+
 
 
 # Report output binary size after each successful build.
@@ -165,3 +168,6 @@ add_custom_target(debug
 add_custom_target(elfread COMMAND readelf -l ${ELF})
 add_custom_target(elfsize COMMAND ${CMAKE_SIZE} -tA ${ELF})
 add_custom_target(analyze DEPENDS elfsize elfread)
+
+# lwjson
+add_subdirectory(lwjson)
