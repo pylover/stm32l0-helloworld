@@ -1,6 +1,5 @@
 ## TODO
 - Coap library
-- Json library
 - Crypto
 
 ## Backlog
