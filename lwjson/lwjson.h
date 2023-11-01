@@ -1,6 +1,7 @@
 /**
  * \file            lwjson.h
  * \brief           LwJSON - Lightweight JSON format parser
+ * https://docs.majerle.eu/projects/lwjson/en/latest/
  */
 
 /*
@@ -184,7 +185,7 @@ struct lwjson_stream_parser;
 
 /**
  * \brief           Callback function for various events
- * 
+ *
  */
 typedef void (*lwjson_stream_parser_callback_fn)(struct lwjson_stream_parser* jsp, lwjson_stream_type_t type);
 
