@@ -74,7 +74,6 @@ startA(struct uaio_task *self) {
     INFO("Starting...");
 
     while (1) {
-
         /* JSON example */
         json_example();
 

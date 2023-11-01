@@ -87,7 +87,8 @@ usart2_init() {
     receiver to clock deviations. In this case, the maximum speed is limited
     to maximum fCK/16 where fCK is the clock source frequency.
     */
-    /* This will cause problem in BAUD rate selection, commented to be dealt later */
+    /* This will cause problem in BAUD rate selection, commented to be dealt
+       later */
     // USART2->CR1 |= USART_CR1_OVER8;
 
     /* BRR register configuration */

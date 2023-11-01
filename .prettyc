@@ -1,3 +1,3 @@
 set noparent
 # filter=-whitespace/newline,-whitespace/blank_line
-# exclude_files=<regex>
+exclude_files=lwjson

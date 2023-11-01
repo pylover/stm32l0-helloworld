@@ -162,10 +162,10 @@ clock_init(struct uaio_task *self) {
     /* Enable the power interface clock by setting the PWREN bits in the
        RCC_APB1ENR */
     RCC->APB1ENR |= RCC_APB1ENR_PWREN;
-    
+
     /* To be able to debug in low power modes */
     RCC->APB2ENR |= RCC_APB2ENR_DBGMCUEN;
-    
+
     /* Set the DBP(Disable backup write protection) bit in the PWR_CR register
        (see Section 6.4.1). */
     PWR->CR |= PWR_CR_DBP;

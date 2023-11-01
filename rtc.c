@@ -168,7 +168,7 @@ rtc_autowakup_init() {
 
     /* Ensure access to Wakeup auto-reload counter and bits WUCKSEL[2:0] is
        allowed. */
-    while((RTC->ISR & RTC_ISR_WUTWF) != RTC_ISR_WUTWF) {}
+    while ((RTC->ISR & RTC_ISR_WUTWF) != RTC_ISR_WUTWF) {}
 
     /* WUCKSEL[2:0]: Wakeup clock selection
      * 000: RTC/16 clock is selected
