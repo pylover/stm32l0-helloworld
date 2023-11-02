@@ -23,9 +23,10 @@
 #include "clog.h"
 #include "dma.h"
 #include "uart.h"
-#include "uaio.h"
 #include "device.h"
 #include "rtc.h"
+
+#include "uaio/uaio.h"
 
 
 #ifndef PROD
@@ -49,7 +50,7 @@ device_init(struct uaio_task *self) {
     initialise_monitor_handles();
 #endif
 
-    CORO_WAIT(clock_init, NULL);
+    UAIO_AWAIT(clock_init, NULL);
 
     DEBUG("Init DMA");
     dma_init();

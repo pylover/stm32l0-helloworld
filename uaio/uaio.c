@@ -17,153 +17,19 @@
  *  Author: Vahid Mardani <vahid.mardani@gmail.com>
  */
 #include <stdlib.h>
+// #include <unistd.h>
+// #include <errno.h>
+// #include <signal.h>
+// #include <stdbool.h>
+// #include <sys/timerfd.h>
 
 #include <clog.h>
 
-#include "stm32l0xx.h"
 #include "uaio.h"
-#include "device.h"
-
-
-#define TASKPOOL_ISFULL(self) ((self)->count == (self)->size)
-#define TASKPOOL_ISEMPTY(self) ((self)->count == 0)
+#include "taskpool.h"
 
 
 static struct uaio_taskpool _tasks;
-
-
-static int
-taskpool_init(struct uaio_taskpool *self, size_t size) {
-    self->pool = calloc(size, sizeof(struct uaio_task*));
-    if (self->pool == NULL) {
-        return -1;
-    }
-    memset(self->pool, 0, size * sizeof(struct uaio_task*));
-    self->count = 0;
-    self->size = size;
-    return 0;
-}
-
-
-static void
-taskpool_deinit(struct uaio_taskpool *self) {
-    if (self->pool == NULL) {
-        return;
-    }
-    free(self->pool);
-}
-
-
-static int
-taskpool_append(struct uaio_taskpool *self, struct uaio_task *item) {
-    int i;
-
-    if (item == NULL) {
-        return -1;
-    }
-
-    if (TASKPOOL_ISFULL(self)) {
-        return -1;
-    }
-
-    for (i = 0; i < self->size; i++) {
-        if (self->pool[i] == NULL) {
-            goto found;
-        }
-    }
-
-    return -1;
-
-found:
-    self->pool[i] = item;
-    self->count++;
-    return i;
-}
-
-
-static int
-taskpool_delete(struct uaio_taskpool *self, unsigned int index) {
-    if (self->size <= index) {
-        return -1;
-    }
-
-    self->pool[index] = NULL;
-    return 0;
-}
-
-
-static struct uaio_task*
-taskpool_get(struct uaio_taskpool *self, unsigned int index) {
-    if (self->size <= index) {
-        return NULL;
-    }
-
-    return self->pool[index];
-}
-
-
-static void
-taskpool_vacuum(struct uaio_taskpool *self) {
-    int i;
-    int shift = 0;
-
-    for (i = 0; i < self->count; i++) {
-        if (self->pool[i] == NULL) {
-            shift++;
-            continue;
-        }
-
-        if (!shift) {
-            continue;
-        }
-
-        self->pool[i - shift] = self->pool[i];
-        self->pool[i - shift]->index = i - shift;
-        self->pool[i] = NULL;
-    }
-
-    self->count -= shift;
-}
-
-
-static struct uaio_task *timer1 = NULL;
-
-
-void
-TIM2_IRQHandler() {
-    if (!(TIM2->SR & TIM_SR_UIF)) {
-        return;
-    }
-
-    if (timer1 == NULL) {
-        return;
-    }
-
-    TIM2->SR = ~TIM_SR_UIF;
-    TIM2->CR1 &= ~TIM_CR1_CEN;
-    timer1->status = UAIO_RUNNING;
-    timer1 = NULL;
-}
-
-
-ASYNC
-sleepA(struct uaio_task *self, struct uaio_sleep *state) {
-    CORO_START;
-
-    if (timer1 != NULL) {
-        CORO_REJECT("Timer busy");
-    }
-
-    TIM2->CNT = state->miliseconds;
-    TIM2->ARR = state->miliseconds;
-    TIM2->EGR |= TIM_EGR_UG;
-    TIM2->CR1 |= TIM_CR1_CEN;
-
-    timer1 = self;
-    CORO_WAITI();
-
-    CORO_FINALLY;
-}
 
 
 int
@@ -184,47 +50,41 @@ onerror:
 void
 uaio_deinit() {
     taskpool_deinit(&_tasks);
+    errno = 0;
 }
 
 
-static void
-_uaio_task_dispose(struct uaio_task *task) {
-    if (task == NULL) {
-        return;
-    }
+void
+uaio_task_dispose(struct uaio_task *task) {
     taskpool_delete(&_tasks, task->index);
     free(task);
 }
 
 
-int
-uaio_task_new(uaio_coro coro, void *state) {
+struct uaio_task *
+uaio_task_new() {
+    int index;
     struct uaio_task *task;
 
     if (TASKPOOL_ISFULL(&_tasks)) {
-        return -1;
+        return NULL;
     }
 
     task = malloc(sizeof(struct uaio_task));
     if (task == NULL) {
-        return -1;
+        return NULL;
     }
 
     /* Register task */
-    task->index = taskpool_append(&_tasks, task);
-    if (task->index == -1) {
+    index = taskpool_append(&_tasks, task);
+    if (index == -1) {
         free(task);
-        return -1;
+        return NULL;
     }
+    task->index = index;
     task->current = NULL;
 
-    /* Update the task->current */
-    if (uaio_call_new(task, coro, state)) {
-        _uaio_task_dispose(task);
-        return -1;
-    }
-
-    return 0;
+    return task;
 }
 
 
@@ -244,24 +104,26 @@ uaio_task_killall() {
 }
 
 
+static void
+uaio_invoker_default(struct uaio_task *task) {
+    struct uaio_call *call = task->current;
+
+    call->coro(task, call->state);
+}
+
+
 int
 uaio_call_new(struct uaio_task *task, uaio_coro coro, void *state) {
-    struct uaio_call *parent = task->current;
     struct uaio_call *call = malloc(sizeof(struct uaio_call));
     if (call == NULL) {
         return -1;
     }
 
-    if (parent == NULL) {
-        call->parent = NULL;
-    }
-    else {
-        call->parent = parent;
-    }
-
+    call->parent = task->current;
     call->coro = coro;
     call->state = state;
     call->line = 0;
+    call->invoke = uaio_invoker_default;
 
     task->status = UAIO_RUNNING;
     task->current = call;
@@ -286,23 +148,15 @@ start:
             /* Ignore if task is waiting for IO events */
             return false;
 
-        case UAIO_TERMINATED:
-        case UAIO_YIELDING:
-        case UAIO_RUNNING:
-            /* Nothing to do. */
-            break;
+        default:
     }
 
-    call->coro(task, call->state);
+    call->invoke(task);
+
     /* Post execution */
     switch (task->status) {
         case UAIO_TERMINATING:
             goto start;
-        case UAIO_YIELDING:
-            if (call->parent == NULL) {
-                task->status = UAIO_RUNNING;
-                break;
-            }
         case UAIO_TERMINATED:
             task->current = call->parent;
             free(call);
@@ -310,15 +164,11 @@ start:
                 task->status = UAIO_RUNNING;
             }
             break;
-
-        case UAIO_SLEEPING:
-        case UAIO_RUNNING:
-            /* Nothing to do. */
-            break;
+        default:
     }
 
     if (task->current == NULL) {
-        _uaio_task_dispose(task);
+        uaio_task_dispose(task);
         return true;
     }
 
@@ -327,7 +177,7 @@ start:
 
 
 int
-uaio_start() {
+uaio_loop() {
     int taskindex;
     struct uaio_task *task = NULL;
     bool vacuum_needed;
@@ -354,8 +204,29 @@ uaio_start() {
 
 
 int
-uaio_forever() {
-    if (uaio_start()) {
+uaio_spawn(uaio_coro coro, void *state) {
+    struct uaio_task *task = NULL;
+
+    task = uaio_task_new();
+    if (task == NULL) {
+        return -1;
+    }
+
+    if (uaio_call_new(task, coro, state)) {
+        goto failure;
+    }
+
+    return 0;
+
+failure:
+    uaio_task_dispose(task);
+    return -1;
+}
+
+
+int
+uaio_handover() {
+    if (uaio_loop()) {
         goto onerror;
     }
 
@@ -369,16 +240,16 @@ onerror:
 
 
 int
-uaio(uaio_coro coro, void *state, size_t maxtasks) {
+uaio_forever(uaio_coro coro, void *state, size_t maxtasks) {
     if (uaio_init(maxtasks)) {
         return -1;
     }
 
-    if (uaio_task_new(coro, state)) {
+    if (uaio_spawn(coro, state)) {
         goto failure;
     }
 
-    if (uaio_start()) {
+    if (uaio_loop()) {
         goto failure;
     }
 

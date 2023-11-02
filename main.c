@@ -26,8 +26,9 @@
 #include "rtc.h"
 #include "device.h"
 #include "uart.h"
-#include "uaio.h"
 
+#include "uaio/uaio.h"
+#include "uaio/sleep.h"
 #include "lwjson/lwjson.h"
 
 
@@ -60,7 +61,6 @@ json_example(void) {
 
 static ASYNC
 startA(struct uaio_task *self) {
-    static struct uaio_sleep sleep = {2000};
     // static struct usart usart2 = {
     //     .send = "hello\r\n",
     //     .sendlen = 7,
@@ -68,7 +68,7 @@ startA(struct uaio_task *self) {
 
     CORO_START;
     INFO("Initializing...");
-    CORO_WAIT(device_init, NULL);
+    UAIO_AWAIT(device_init, NULL);
 
     rtc_autowakup_init();
     INFO("Starting...");
@@ -78,7 +78,7 @@ startA(struct uaio_task *self) {
         json_example();
 
         /* sleep example */
-        CORO_WAIT(sleepA, &sleep);
+        CORO_SLEEP(2000);
 
         /* RTC Date & time */
         print_date(false);
@@ -103,5 +103,5 @@ main(void) {
     clog_verbosity = CLOG_DEBUG;
 #endif
 
-    return UAIO(startA, NULL, 2);
+    return UAIO_FOREVER(startA, NULL, 2);
 }

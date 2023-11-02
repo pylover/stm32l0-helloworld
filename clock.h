@@ -32,15 +32,7 @@ extern volatile uint32_t ticks_ms;
 
 
 #include "stm32l0xx.h"
-#include "uaio.h"
-
-
-// void
-// delay_ms(uint32_t ms);
-//
-//
-// void
-// delay_s(uint32_t s);
+#include "uaio/uaio.h"
 
 
 ASYNC

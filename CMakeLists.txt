@@ -88,13 +88,12 @@ add_executable(${CMAKE_PROJECT_NAME}
     dma.c
     rtc.c
     device.c
-    uaio.c
 )
 target_link_options(${CMAKE_PROJECT_NAME}
     PRIVATE 
     "LINKER:--no-warn-rwx-segments"
 )
-target_link_libraries(${CMAKE_PROJECT_NAME} lwjson)
+target_link_libraries(${CMAKE_PROJECT_NAME} lwjson uaio)
 # target_link_libraries(${CMAKE_PROJECT_NAME} lwjson_debug)
 
 
@@ -170,4 +169,5 @@ add_custom_target(elfsize COMMAND ${CMAKE_SIZE} -G ${ELF})
 add_custom_target(analyze DEPENDS elfsize elfread)
 
 # lwjson
+add_subdirectory(uaio)
 add_subdirectory(lwjson)

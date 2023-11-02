@@ -20,7 +20,7 @@
 #define UART_H_
 
 
-#include "uaio.h"
+#include "uaio/uaio.h"
 
 
 struct usart {

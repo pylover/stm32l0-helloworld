@@ -16,14 +16,37 @@
  *
  *  Author: Vahid Mardani <vahid.mardani@gmail.com>
  */
-#ifndef UAIO_H_
-#define UAIO_H_
+#ifndef UAIO_UAIO_H_
+#define UAIO_UAIO_H_
 
+
+#include <errno.h>
 
 #include <clog.h>
 
 
+/* Generic stuff */
+#define UAIO_NAME_PASTER(x, y) x ## _ ## y
+#define UAIO_NAME_EVALUATOR(x, y)  UAIO_NAME_PASTER(x, y)
+#define UAIO_NAME(n) UAIO_NAME_EVALUATOR(UAIO_ENTITY, n)
 #define ASYNC void
+#define AWAIT(entity, coro, ...) \
+    do { \
+        (self)->current->line = __LINE__; \
+        if (entity ## _call_new(self, coro, __VA_ARGS__)) { \
+            (self)->status = UAIO_TERMINATING; \
+        } \
+        return; \
+        case __LINE__:; \
+    } while (0)
+#define UAIO_AWAIT(coro, ...) AWAIT(uaio, (uaio_coro)coro, __VA_ARGS__)
+#define UAIO_IWAIT() \
+    do { \
+        (self)->current->line = __LINE__; \
+        (self)->status = UAIO_SLEEPING; \
+        return; \
+        case __LINE__:; \
+    } while (0)
 
 
 #define CORO_START \
@@ -33,73 +56,25 @@
 
 #define CORO_FINALLY \
         case -1:; } \
-    (self)->status = UAIO_TERMINATED;
+    (self)->status = UAIO_TERMINATED
 
 
-#define CORO_YIELD(v) \
-    do { \
-        (self)->current->line = __LINE__; \
-        (self)->status = UAIO_YIELDING; \
-        (self)->value = v; \
-        return; \
-        case __LINE__:; \
-    } while (0)
-
-
-#define CORO_YIELDFROM(coro, state, v, t) \
-    do { \
-        (self)->current->line = __LINE__; \
-        if (uaio_call_new(self, (uaio_coro)coro, (void *)state)) { \
-            (self)->status = UAIO_TERMINATING; \
-        } \
-        else { \
-            (self)->status = UAIO_RUNNING; \
-        } \
-        return; \
-        case __LINE__:; \
-        v = (t)(self)->value; \
-    } while (0)
-
-
-#define CORO_WAIT(coro, state) \
-    do { \
-        (self)->current->line = __LINE__; \
-        if (uaio_call_new(self, (uaio_coro)coro, (void *)state)) { \
-            (self)->status = UAIO_TERMINATING; \
-        } \
-        return; \
-        case __LINE__:; \
-    } while (0)
-
-
-#define CORO_WAITI() \
-    do { \
-        (self)->current->line = __LINE__; \
-        (self)->status = UAIO_SLEEPING; \
-        return; \
-        case __LINE__:; \
-    } while (0)
-
-
-#define CORO_REJECT(fmt, ...) \
-    if (fmt) { \
-        ERROR(fmt, ## __VA_ARGS__); \
-    } \
+#define CORO_RETURN \
     (self)->status = UAIO_TERMINATING; \
-    return;
+    return
 
 
-#define UAIO(coro, state, maxtasks) \
-    uaio((uaio_coro)(coro), (void*)(state), maxtasks)
+#define CORO_MUSTWAITFD() \
+    ((errno == EAGAIN) || (errno == EWOULDBLOCK) || (errno == EINPROGRESS))
 
 
-#define UAIO_RUN(coro, state) \
-    uaio_task_new((uaio_coro)coro, (void *)(state))
+#define UAIO_SPAWN(coro, state) uaio_spawn((uaio_coro)(coro), (void*)(state))
+#define UAIO_FOREVER(coro, state, maxtasks) \
+    uaio_forever((uaio_coro)(coro), (void*)(state), maxtasks)
 
 
 enum uaio_taskstatus {
     UAIO_RUNNING,
-    UAIO_YIELDING,
     UAIO_SLEEPING,
     UAIO_TERMINATING,
     UAIO_TERMINATED,
@@ -108,13 +83,15 @@ enum uaio_taskstatus {
 
 struct uaio_task;
 typedef void (*uaio_coro) (struct uaio_task *self, void *state);
+typedef void (*uaio_invoker) (struct uaio_task *self);
 
 
 struct uaio_call {
-    uaio_coro coro;
-    int line;
     struct uaio_call *parent;
+    int line;
+    uaio_coro coro;
     void *state;
+    uaio_invoker invoke;
 };
 
 
@@ -122,7 +99,6 @@ struct uaio_task {
     int index;
     enum uaio_taskstatus status;
     struct uaio_call *current;
-    int value;
 };
 
 
@@ -133,17 +109,12 @@ struct uaio_taskpool {
 };
 
 
-struct uaio_sleep {
-    unsigned int miliseconds;
-};
+int
+uaio_forever(uaio_coro coro, void *state, size_t maxtasks);
 
 
 int
-uaio(uaio_coro coro, void *state, size_t maxtasks);
-
-
-int
-uaio_forever();
+uaio_handover();
 
 
 int
@@ -155,11 +126,11 @@ uaio_deinit();
 
 
 int
-uaio_start();
+uaio_loop();
 
 
-int
-uaio_task_new(uaio_coro coro, void *state);
+struct uaio_task *
+uaio_task_new();
 
 
 int
@@ -167,11 +138,15 @@ uaio_call_new(struct uaio_task *task, uaio_coro coro, void *state);
 
 
 void
+uaio_task_dispose(struct uaio_task *task);
+
+
+void
 uaio_task_killall();
 
 
-ASYNC
-sleepA(struct uaio_task *self, struct uaio_sleep *state);
+int
+uaio_spawn(uaio_coro coro, void *state);
 
 
-#endif  // UAIO_H_
+#endif  // UAIO_UAIO_H_

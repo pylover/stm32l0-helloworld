@@ -1,7 +1,8 @@
 ## TODO
+- Make clog as a library/directory
 - Coap library
 - Crypto
-- Remove debug symbols (production build)
+- Remove debug symbols (production build), No logs
 - Flash and eeprom protection.
 
 

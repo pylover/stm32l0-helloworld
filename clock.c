@@ -21,9 +21,7 @@
 #include "clock.h"
 #include "stm32l0xx.h"
 #include "clog.h"
-// #include "uart.h"
-#include "uaio.h"
-// #include "device.h"
+#include "uaio/uaio.h"
 #include "rtc.h"
 
 
@@ -256,6 +254,6 @@ clock_init(struct uaio_task *self) {
     RCC->CFGR &= ~RCC_CFGR_PPRE1;
     // RCC->CFGR |= ~RCC_CFGR_PPRE1_DIV2;
 
-    CORO_WAITI();
+    UAIO_IWAIT();
     CORO_FINALLY;
 }
