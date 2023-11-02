@@ -25,6 +25,7 @@
 #include "stm32l0xx.h"
 #include "dma.h"
 #include "uart.h"
+#include "gpio.h"
 #include "device.h"
 #include "rtc.h"
 
@@ -51,6 +52,9 @@ device_init(struct uaio_task *self) {
 #endif
 
     UAIO_AWAIT(clock_init, NULL);
+
+    DEBUG("Init GPIO");
+    gpio_init();
 
     DEBUG("Init DMA");
     dma_init();

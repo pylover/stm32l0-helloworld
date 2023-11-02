@@ -25,6 +25,7 @@
 #include "rtc.h"
 #include "device.h"
 #include "uart.h"
+#include "gpio.h"
 
 #include "clog/clog.h"
 #include "uaio/uaio.h"
@@ -32,35 +33,36 @@
 #include "lwjson/lwjson.h"
 
 
-/* LwJSON instance and tokens */
-static lwjson_token_t tokens[128];
-static lwjson_t lwjson;
-
-/* Parse JSON */
-static void
-json_example(void) {
-    lwjson_init(&lwjson, tokens, LWJSON_ARRAYSIZE(tokens));
-    if (lwjson_parse(&lwjson, "{\"foo\": \"bar\"}") == lwjsonOK) {
-        const lwjson_token_t* t;
-        printf("JSON parsed..\r\n");
-
-        /* Find custom key in JSON */
-        if ((t = lwjson_find(&lwjson, "foo")) != NULL) {
-            printf("Key found %.*s: %.*s\r\n",
-                    t->token_name_len,
-                    t->token_name,
-                    t->u.str.token_value_len,
-                    t->u.str.token_value);
-        }
-
-        /* Call this when not used anymore */
-        lwjson_free(&lwjson);
-    }
-}
+/* Uncomment for JSON example */
+// static lwjson_token_t tokens[128];
+// static lwjson_t lwjson;
+//
+//
+// static void
+// json_example(void) {
+//     lwjson_init(&lwjson, tokens, LWJSON_ARRAYSIZE(tokens));
+//     if (lwjson_parse(&lwjson, "{\"foo\": \"bar\"}") == lwjsonOK) {
+//         const lwjson_token_t* t;
+//         printf("JSON parsed..\r\n");
+//
+//         /* Find custom key in JSON */
+//         if ((t = lwjson_find(&lwjson, "foo")) != NULL) {
+//             printf("Key found %.*s: %.*s\r\n",
+//                     t->token_name_len,
+//                     t->token_name,
+//                     t->u.str.token_value_len,
+//                     t->u.str.token_value);
+//         }
+//
+//         /* Call this when not used anymore */
+//         lwjson_free(&lwjson);
+//     }
+// }
 
 
 static ASYNC
 startA(struct uaio_task *self) {
+    /* Uncommnet for usart example */
     // static struct usart usart2 = {
     //     .send = "hello\r\n",
     //     .sendlen = 7,
@@ -74,21 +76,31 @@ startA(struct uaio_task *self) {
     INFO("Starting...");
 
     while (1) {
-        /* JSON example */
-        json_example();
-
-        /* sleep example */
-        CORO_SLEEP(2000);
+        // /* JSON example */
+        // json_example();
 
         /* RTC Date & time */
         print_date(false);
         print_time();
 
-        // /* USART send using DMA */
-        // CORO_WAIT(usart2_sendA, &usart2);
+        /* GPIO Toggle */
+        // GPIO_TOGGLE(GPIOB, 15);
+        // CORO_SLEEP(1000);
+        // GPIO_TOGGLE(GPIOB, 15);
+
+        /* GPIO set/clear */
+        GPIO_CLEAR(GPIOB, 15);
+        CORO_SLEEP(1000);
+        GPIO_SET(GPIOB, 15);
+
+        /* USART send using DMA */
+        // UAIO_AWAIT(usart2_sendA, &usart2);
 
         // /* device_standby commented for now to test uart dma */
         // device_standby();
+
+        /* sleep example */
+        CORO_SLEEP(2000);
     }
 
     CORO_FINALLY;

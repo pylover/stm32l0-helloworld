@@ -86,6 +86,7 @@ add_executable(${CMAKE_PROJECT_NAME}
     dma.c
     rtc.c
     device.c
+    gpio.c
 )
 target_link_options(${CMAKE_PROJECT_NAME}
     PRIVATE 

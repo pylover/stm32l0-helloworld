@@ -38,8 +38,7 @@ usart2_init() {
     */
     // const char * msg = "Hello\r\n";
 
-    /* Enable clock for GPIOA and USART2 */
-    RCC->IOPENR |= RCC_IOPENR_IOPAEN;
+    /* Enable clock for USART2 */
     RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
 
     /* Clock configuration register (RCC_CCIPR)
@@ -60,13 +59,13 @@ usart2_init() {
     GPIOA->OTYPER &= ~GPIO_OTYPER_OT_2;
 
     /* High speed mode for PA2 */
-    GPIOA->OSPEEDR &= ~GPIO_OSPEEDER_OSPEED2;
+    GPIOA->OSPEEDR &= ~GPIO_OSPEEDR_OSPEED2;
 
     /* Select alternate function mode for PA2 and PA3 */
     GPIOA->MODER |= GPIO_MODER_MODE2_1;
 
     /* Select speed for PA2 */
-    GPIOA->OSPEEDR |= GPIO_OSPEEDER_OSPEED2_1;
+    GPIOA->OSPEEDR |= GPIO_OSPEEDR_OSPEED2_1;
 
     /* Alternate function selection for PA2 */
     GPIOA->AFRL &= ~GPIO_AFRL_AFSEL2_Msk;
