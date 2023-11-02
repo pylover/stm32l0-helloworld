@@ -166,7 +166,7 @@ add_custom_target(debug
 
 # Analyze ELF file
 add_custom_target(elfread COMMAND readelf -l ${ELF})
-add_custom_target(elfsize COMMAND ${CMAKE_SIZE} -tA ${ELF})
+add_custom_target(elfsize COMMAND ${CMAKE_SIZE} -G ${ELF})
 add_custom_target(analyze DEPENDS elfsize elfread)
 
 # lwjson
