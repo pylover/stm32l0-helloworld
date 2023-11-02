@@ -18,7 +18,8 @@
  */
 #include "stm32l0xx.h"
 
-#include "clog.h"
+#include "clog/clog.h"
+
 #include "dma.h"
 
 

@@ -77,9 +77,7 @@ set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
 
 
 # Output binary
-add_library(clog OBJECT clog.c)
 add_executable(${CMAKE_PROJECT_NAME}
-    $<TARGET_OBJECTS:clog>
     ${STM_FAMILY}/${STM_TYPE}.s
     ${STM_FAMILY}/${STM_TYPE}_system.c
     main.c
@@ -93,7 +91,7 @@ target_link_options(${CMAKE_PROJECT_NAME}
     PRIVATE 
     "LINKER:--no-warn-rwx-segments"
 )
-target_link_libraries(${CMAKE_PROJECT_NAME} lwjson uaio)
+target_link_libraries(${CMAKE_PROJECT_NAME} clog lwjson uaio)
 # target_link_libraries(${CMAKE_PROJECT_NAME} lwjson_debug)
 
 
@@ -169,5 +167,6 @@ add_custom_target(elfsize COMMAND ${CMAKE_SIZE} -G ${ELF})
 add_custom_target(analyze DEPENDS elfsize elfread)
 
 # lwjson
+add_subdirectory(clog)
 add_subdirectory(uaio)
 add_subdirectory(lwjson)

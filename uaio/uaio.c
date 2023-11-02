@@ -17,16 +17,10 @@
  *  Author: Vahid Mardani <vahid.mardani@gmail.com>
  */
 #include <stdlib.h>
-// #include <unistd.h>
-// #include <errno.h>
-// #include <signal.h>
-// #include <stdbool.h>
-// #include <sys/timerfd.h>
 
-#include <clog.h>
-
-#include "uaio.h"
-#include "taskpool.h"
+#include "clog/clog.h"
+#include "uaio/uaio.h"
+#include "uaio/taskpool.h"
 
 
 static struct uaio_taskpool _tasks;

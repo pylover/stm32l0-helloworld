@@ -16,9 +16,9 @@
  *
  *  Author: Vahid Mardani <vahid.mardani@gmail.com>
  */
-#include "rtc.h"
+#include "clog/clog.h"
 
-#include "clog.h"
+#include "rtc.h"
 #include "stm32l0xx.h"
 
 

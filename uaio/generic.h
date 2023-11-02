@@ -16,7 +16,7 @@
  *
  *  Author: Vahid Mardani <vahid.mardani@gmail.com>
  */
-#ifndef UAIO_H_  // NOLINT(build/header_guard)
+#ifndef UAIO_UAIO_H_  // NOLINT(build/header_guard)
 #error "uaio.h and clog.h must be imported before importing the" \
     "uaio.h"
 #error "And also #undef and #define UAIO_ENTITY before importing the " \

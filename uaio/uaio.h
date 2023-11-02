@@ -22,7 +22,7 @@
 
 #include <errno.h>
 
-#include <clog.h>
+#include "clog/clog.h"
 
 
 /* Generic stuff */

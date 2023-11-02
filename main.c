@@ -22,11 +22,11 @@
 
 #include "clock.h"
 #include "stm32l0xx.h"
-#include "clog.h"
 #include "rtc.h"
 #include "device.h"
 #include "uart.h"
 
+#include "clog/clog.h"
 #include "uaio/uaio.h"
 #include "uaio/sleep.h"
 #include "lwjson/lwjson.h"

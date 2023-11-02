@@ -18,10 +18,11 @@
  */
 #include <stdio.h>
 
+#include "clog/clog.h"
+#include "uaio/uaio.h"
+
 #include "clock.h"
 #include "stm32l0xx.h"
-#include "clog.h"
-#include "uaio/uaio.h"
 #include "rtc.h"
 
 
