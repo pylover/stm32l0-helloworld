@@ -22,10 +22,13 @@
 
 #include "uaio/uaio.h"
 
+#include "dma.h"
+
 
 struct usart {
     const char *send;
     unsigned short sendlen;
+    struct dma dma;
 };
 
 

@@ -195,7 +195,7 @@ typedef struct
   * @brief DMA Controller
   */
 
-typedef struct
+typedef struct dma_channel
 {
   __IO uint32_t CCR;          /*!< DMA channel x configuration register */
   __IO uint32_t CNDTR;        /*!< DMA channel x number of data register */

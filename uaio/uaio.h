@@ -40,10 +40,11 @@
         case __LINE__:; \
     } while (0)
 #define UAIO_AWAIT(coro, ...) AWAIT(uaio, (uaio_coro)coro, __VA_ARGS__)
-#define UAIO_IWAIT() \
+#define UAIO_IWAIT(e) \
     do { \
         (self)->current->line = __LINE__; \
         (self)->status = UAIO_SLEEPING; \
+        e; \
         return; \
         case __LINE__:; \
     } while (0)

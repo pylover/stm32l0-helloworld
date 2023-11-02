@@ -20,13 +20,31 @@
 #define DMA_H_
 
 
+#include "uaio/uaio.h"
+
+
+enum dma_direction {
+    DMA_MEM2PERI,
+    DMA_MEM2MEM,
+    DMA_PERI2MEM,
+};
+
+
+typedef struct dma {
+    struct dma_channel *channel;
+    enum dma_direction direction;
+    void *source;
+    void *target;
+    uint32_t bytes;
+} dma;
+
+
 void
 dma_init();
 
 
-void
-dma_memory_to_peripheral_circular(volatile uint32_t *peripheral,
-        const char *data, uint32_t count);
+ASYNC
+dmaA(struct uaio_task *self, struct dma *state);
 
 
 #endif  // DMA_H_

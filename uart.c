@@ -16,8 +16,6 @@
  *
  *  Author: Vahid Mardani <vahid.mardani@gmail.com>
  */
-
-
 #include "stm32l0xx.h"
 
 #include "uart.h"
@@ -72,7 +70,7 @@ usart2_init() {
     GPIOA->AFRL |= GPIOA_AFRL_AFSEL2_AF4_USART2_TX;
 
     /* Disable USART2 */
-    USART2->CR1 &= ~USART_CR1_UE;
+    CLEAR_BIT(USART2->CR1, USART_CR1_UE);
 
     /* CR1 configuration */
     /* Word length: 00: 1 Start bit, 8 data bits, n stop bits */
@@ -97,8 +95,8 @@ usart2_init() {
     /* Enable USART2 Transmitter */
     USART2->CR1 |= USART_CR1_TE;
 
-    /* Enable USART2 DMA request */
-    USART2->CR3 |= USART_CR3_DMAT;
+    /* Enable USART2 */
+    SET_BIT(USART2->CR1, USART_CR1_UE);
 }
 
 
@@ -106,8 +104,22 @@ ASYNC
 usart2_sendA(struct uaio_task *self, struct usart *state) {
     CORO_START;
 
-    dma_memory_to_peripheral_circular(&USART2->TDR, state->send,
-            state->sendlen);
+    state->dma.channel = DMA1_CH4;
+    state->dma.direction = DMA_MEM2PERI;
+    state->dma.target = (void*)&USART2->TDR;
+    state->dma.source = (void*)state->send;
+    state->dma.bytes = state->sendlen;
+
+    DEBUGN("Sending: %.*s", state->sendlen, state->send);
+
+    /* Enable USART2 DMA request */
+    SET_BIT(USART2->CR3, USART_CR3_DMAT);
+
+    UAIO_AWAIT(dmaA, &(state->dma));
+    DEBUG("Transfer completed");
+
+    /* Disable USART2 DMA request */
+    CLEAR_BIT(USART2->CR3, USART_CR3_DMAT);
 
     CORO_FINALLY;
 }

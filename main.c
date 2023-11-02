@@ -62,11 +62,10 @@
 
 static ASYNC
 startA(struct uaio_task *self) {
-    /* Uncommnet for usart example */
-    // static struct usart usart2 = {
-    //     .send = "hello\r\n",
-    //     .sendlen = 7,
-    // };
+    static struct usart usart2 = {
+        .send = "hello\r\n",
+        .sendlen = 7,
+    };
 
     CORO_START;
     INFO("Initializing...");
@@ -84,23 +83,23 @@ startA(struct uaio_task *self) {
         print_time();
 
         /* GPIO Toggle */
-        // GPIO_TOGGLE(GPIOB, 15);
+        GPIO_TOGGLE(GPIOB, 15);
         // CORO_SLEEP(1000);
         // GPIO_TOGGLE(GPIOB, 15);
 
-        /* GPIO set/clear */
-        GPIO_CLEAR(GPIOB, 15);
-        CORO_SLEEP(1000);
-        GPIO_SET(GPIOB, 15);
+        // /* GPIO set/clear */
+        // GPIO_CLEAR(GPIOB, 15);
+        // CORO_SLEEP(1000);
+        // GPIO_SET(GPIOB, 15);
 
         /* USART send using DMA */
-        // UAIO_AWAIT(usart2_sendA, &usart2);
+        UAIO_AWAIT(usart2_sendA, &usart2);
 
         // /* device_standby commented for now to test uart dma */
         // device_standby();
 
         /* sleep example */
-        CORO_SLEEP(2000);
+        CORO_SLEEP(1000);
     }
 
     CORO_FINALLY;
@@ -115,5 +114,5 @@ main(void) {
     clog_verbosity = CLOG_DEBUG;
 #endif
 
-    return UAIO_FOREVER(startA, NULL, 2);
+    return UAIO_FOREVER(startA, NULL, 3);
 }
