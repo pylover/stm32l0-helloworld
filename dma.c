@@ -104,10 +104,10 @@ dma_setup(struct dma *state) {
         /* Disable address incrementation on peripheral address */
         CLEAR_BIT(ch->CCR, DMA_CCR_PINC);
 
-        /* Disable circular mode */
-        CLEAR_BIT(ch->CCR, DMA_CCR_CIRC);
-        // /* Enable circular mode */
-        // SET_BIT(ch->CCR, DMA_CCR_CIRC);
+        // /* Disable circular mode */
+        // CLEAR_BIT(ch->CCR, DMA_CCR_CIRC);
+        /* Enable circular mode */
+        SET_BIT(ch->CCR, DMA_CCR_CIRC);
     }
 
     /* Set size of data to be sent */
@@ -160,7 +160,9 @@ ASYNC
 dmaA(struct uaio_task *self, struct dma *state) {
     CORO_START;
 
-    dma_setup(state);
+    if (!state->configured) {
+        dma_setup(state);
+    }
 
     if (state->channel == DMA1_CH4) {
         /* clear interrupt flags  */

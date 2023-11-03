@@ -65,6 +65,7 @@ startA(struct uaio_task *self) {
     static struct usart usart2 = {
         .send = "hello\r\n",
         .sendlen = 7,
+        .dma.configured = false,
     };
 
     CORO_START;

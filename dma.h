@@ -31,6 +31,7 @@ enum dma_direction {
 
 
 typedef struct dma {
+    bool configured;
     struct dma_channel *channel;
     enum dma_direction direction;
     void *source;
