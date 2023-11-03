@@ -65,6 +65,17 @@
     return
 
 
+#define CORO_REJECT(n) \
+    (self)->eno = n; \
+    (self)->status = CAIO_TERMINATING; \
+    return
+
+
+#define CAIO_HASERROR(task) (task->eno != 0)
+#define CAIO_ISERROR(task, e) (CAIO_HASERROR(task) && (task->eno == e))
+#define CAIO_CLEARERROR(task) task->eno = 0
+
+
 #define CORO_MUSTWAITFD() \
     ((errno == EAGAIN) || (errno == EWOULDBLOCK) || (errno == EINPROGRESS))
 
@@ -98,6 +109,7 @@ struct uaio_call {
 
 struct uaio_task {
     int index;
+    int eno;
     enum uaio_taskstatus status;
     struct uaio_call *current;
 };

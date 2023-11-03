@@ -25,19 +25,31 @@
 #include "dma.h"
 
 
+#define USART2_SENDBUFF_SIZE    1024
+#define USART2_SEND() UAIO_AWAIT(usart2_sendA, NULL)
+
+
 struct usart {
-    const char *send;
+    char send[USART2_SENDBUFF_SIZE];
     unsigned short sendlen;
     struct dma dma;
 };
 
 
 void
+usart2_deinit();
+
+
+void
 usart2_init();
 
 
+void
+usart2_write(const char *fmt, ...);
+
+
 ASYNC
-usart2_sendA(struct uaio_task *self, struct usart *state);
+usart2_sendA(struct uaio_task *self);
 
 
 #endif  // UART_H_

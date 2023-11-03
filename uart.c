@@ -16,10 +16,15 @@
  *
  *  Author: Vahid Mardani <vahid.mardani@gmail.com>
  */
+#include <stdlib.h>
+
 #include "stm32l0xx.h"
 
 #include "uart.h"
 #include "dma.h"
+
+
+static struct usart *usart2 = NULL;
 
 
 /** USART2 initializer
@@ -28,6 +33,15 @@
   */
 void
 usart2_init() {
+    /* Allocate memory for usart2 state */
+    usart2 = malloc(sizeof(struct usart));
+    if (usart2 == NULL) {
+        ERROR("Out of memory when allocating for usart2");
+        return;
+    }
+    usart2->sendlen = 0;
+    usart2->dma.configured = false;
+
     /*
     USART2 pins
     TX,     pin 12, PA2, APB1
@@ -93,33 +107,56 @@ usart2_init() {
     USART2->BRR = (uint32_t) system_clock / baud_rate;
 
     /* Enable USART2 Transmitter */
-    USART2->CR1 |= USART_CR1_TE;
+    SET_BIT(USART2->CR1, USART_CR1_TE);
 
     /* Enable USART2 */
     SET_BIT(USART2->CR1, USART_CR1_UE);
 }
 
 
+void
+usart2_deinit() {
+    /* Disable USART2 */
+    CLEAR_BIT(USART2->CR1, USART_CR1_UE);
+
+    if (usart2) {
+        free(usart2);
+    }
+}
+
+
+void
+usart2_write(const char *fmt, ...) {
+    va_list ap;
+
+    va_start(ap, fmt);
+    usart2->sendlen += vsnprintf(usart2->send + usart2->sendlen,
+            USART2_SENDBUFF_SIZE - usart2->sendlen, fmt, ap);
+    va_end(ap);
+}
+
+
 ASYNC
-usart2_sendA(struct uaio_task *self, struct usart *state) {
+usart2_sendA(struct uaio_task *self) {
     CORO_START;
 
-    state->dma.channel = DMA1_CH4;
-    state->dma.direction = DMA_MEM2PERI;
-    state->dma.target = (void*)&USART2->TDR;
-    state->dma.source = (void*)state->send;
-    state->dma.bytes = state->sendlen;
+    usart2->dma.channel = DMA1_CH4;
+    usart2->dma.direction = DMA_MEM2PERI;
+    usart2->dma.target = (void*)&USART2->TDR;
+    usart2->dma.source = (void*)usart2->send;
+    usart2->dma.bytes = usart2->sendlen;
 
-    DEBUGN("Sending: %.*s", state->sendlen, state->send);
+    DEBUGN("Sending: %.*s", usart2->sendlen, usart2->send);
 
     /* Enable USART2 DMA request */
     SET_BIT(USART2->CR3, USART_CR3_DMAT);
 
-    UAIO_AWAIT(dmaA, &(state->dma));
-    DEBUG("Transfer completed");
+    UAIO_AWAIT(dmaA, &(usart2->dma));
+    // DEBUG("Transfer completed");
 
     /* Disable USART2 DMA request */
     CLEAR_BIT(USART2->CR3, USART_CR3_DMAT);
+    usart2->sendlen = 0;
 
     CORO_FINALLY;
 }
