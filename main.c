@@ -96,6 +96,7 @@ startA(struct uaio_task *self) {
         usart2_write("Hello");
         usart2_write(", Packet: %d\r\n", c++);
         USART2_SEND();
+        // USART2_RECV();
 
         // /* device_standby commented for now to test uart dma */
         // device_standby();

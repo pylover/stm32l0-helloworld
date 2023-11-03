@@ -42,7 +42,7 @@ dma_init() {
 }
 
 
-static void
+void
 dma_setup(struct dma *state) {
     struct dma_channel *ch = state->channel;
 
@@ -110,9 +110,6 @@ dma_setup(struct dma *state) {
         SET_BIT(ch->CCR, DMA_CCR_CIRC);
     }
 
-    /* Set size of data to be sent */
-    ch->CNDTR = state->bytes;
-
     /* Set the memory and pripheral write chunk size to one byte */
     /*
     00: 8 bits
@@ -151,7 +148,6 @@ DMA1_Channel4_7_IRQHandler() {
         CLEAR_BIT(DMA1_CH4->CCR, DMA_CCR_EN);
 
         channel4->status = UAIO_RUNNING;
-        channel4 = NULL;
     }
 }
 
@@ -160,15 +156,17 @@ ASYNC
 dmaA(struct uaio_task *self, struct dma *state) {
     CORO_START;
 
-    if (!state->configured) {
-        dma_setup(state);
-    }
-
     if (state->channel == DMA1_CH4) {
+        if (channel4 == NULL) {
+            dma_setup(state);
+            channel4 = self;
+        }
         /* clear interrupt flags  */
         SET_BIT(DMA1->IFCR, DMA_IFCR_CTCIF4 | DMA_IFCR_CTEIF4);
-        channel4 = self;
     }
+
+    /* Set size of data to be sent */
+    state->channel->CNDTR = state->bytes;
 
     UAIO_IWAIT(state->channel->CCR |= DMA_CCR_EN);
 
