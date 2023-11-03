@@ -31,8 +31,7 @@
 
 struct usart {
     char send[USART2_SENDBUFF_SIZE];
-    unsigned short sendlen;
-    struct dma dma;
+    int sendlen;
 };
 
 

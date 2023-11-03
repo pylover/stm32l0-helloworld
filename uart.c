@@ -40,10 +40,8 @@ usart2_init() {
         return;
     }
     usart2->sendlen = 0;
-    usart2->dma.channel = DMA1_CH4;
-    usart2->dma.direction = DMA_MEM2PERI;
-    usart2->dma.target = (void*)&USART2->TDR;
-    usart2->dma.source = (void*)usart2->send;
+    dma_setup(DMA1_CH4, DMA_MEM2PERI, (void*)usart2->send,
+            (void*)&USART2->TDR);
 
     /*
     USART2 pins
@@ -143,13 +141,12 @@ ASYNC
 usart2_sendA(struct uaio_task *self) {
     CORO_START;
 
-    usart2->dma.bytes = usart2->sendlen;
     DEBUGN("Sending: %.*s", usart2->sendlen, usart2->send);
 
     /* Enable USART2 DMA request */
     SET_BIT(USART2->CR3, USART_CR3_DMAT);
 
-    UAIO_AWAIT(dmaA, &(usart2->dma));
+    DMA_CH4_WAIT((void*)usart2->sendlen);
     // DEBUG("Transfer completed");
 
     /* Disable USART2 DMA request */

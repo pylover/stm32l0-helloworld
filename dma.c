@@ -43,9 +43,8 @@ dma_init() {
 
 
 void
-dma_setup(struct dma *state) {
-    struct dma_channel *ch = state->channel;
-
+dma_setup(struct dma_channel *ch, enum dma_direction direction,
+        void *source, void *target) {
     /* Disable DMA */
     CLEAR_BIT(ch->CCR, DMA_CCR_EN);
 
@@ -71,7 +70,7 @@ dma_setup(struct dma *state) {
     0: disabled
     1: enabled
     */
-    if (state->direction == DMA_MEM2MEM) {
+    if (direction == DMA_MEM2MEM) {
         SET_BIT(ch->CCR, DMA_CCR_MEM2MEM);
 
         /* Enable memory address incrementation by one in both sides */
@@ -82,20 +81,20 @@ dma_setup(struct dma *state) {
         CLEAR_BIT(ch->CCR, DMA_CCR_CIRC);
 
         CLEAR_BIT(ch->CCR, DMA_CCR_DIR);
-        ch->CPAR = (uint32_t)state->source;
-        ch->CMAR = (uint32_t)state->target;
+        ch->CPAR = (uint32_t)source;
+        ch->CMAR = (uint32_t)target;
     }
     else {
         CLEAR_BIT(ch->CCR, DMA_CCR_MEM2MEM);
-        if (state->direction == DMA_MEM2PERI) {
+        if (direction == DMA_MEM2PERI) {
             SET_BIT(ch->CCR, DMA_CCR_DIR);
-            ch->CPAR = (uint32_t)state->target;
-            ch->CMAR = (uint32_t)state->source;
+            ch->CPAR = (uint32_t)target;
+            ch->CMAR = (uint32_t)source;
         }
         else {
             CLEAR_BIT(ch->CCR, DMA_CCR_DIR);
-            ch->CPAR = (uint32_t)state->source;
-            ch->CMAR = (uint32_t)state->target;
+            ch->CPAR = (uint32_t)source;
+            ch->CMAR = (uint32_t)target;
         }
 
         /* Set memory address incement by one byte */
@@ -135,8 +134,8 @@ DMA1_Channel4_7_IRQHandler() {
 
     /* transfer error */
     if (DMA1->ISR & DMA_ISR_TEIF4) {
-        DEBUG("DMA ERROR");
         SET_BIT(DMA1->IFCR, DMA_IFCR_CTEIF4);
+        DEBUG("DMA ERROR");
     }
 
     /* Full transfer */
@@ -153,22 +152,14 @@ DMA1_Channel4_7_IRQHandler() {
 
 
 ASYNC
-dmaA(struct uaio_task *self, struct dma *state) {
+dma_ch4A(struct uaio_task *self, int bytes) {
     CORO_START;
 
-    if (state->channel == DMA1_CH4) {
-        if (channel4 == NULL) {
-            dma_setup(state);
-            channel4 = self;
-        }
-        /* clear interrupt flags  */
-        SET_BIT(DMA1->IFCR, DMA_IFCR_CTCIF4 | DMA_IFCR_CTEIF4);
-    }
+    channel4 = self;
+    SET_BIT(DMA1->IFCR, DMA_IFCR_CTCIF4 | DMA_IFCR_CTEIF4);
 
     /* Set size of data to be sent */
-    state->channel->CNDTR = state->bytes;
-
-    UAIO_IWAIT(state->channel->CCR |= DMA_CCR_EN);
-
+    DMA1_CH4->CNDTR = bytes;
+    UAIO_IWAIT(DMA1_CH4->CCR |= DMA_CCR_EN);
     CORO_FINALLY;
 }

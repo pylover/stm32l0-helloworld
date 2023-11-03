@@ -30,21 +30,20 @@ enum dma_direction {
 };
 
 
-typedef struct dma {
-    struct dma_channel *channel;
-    enum dma_direction direction;
-    void *source;
-    void *target;
-    uint32_t bytes;
-} dma;
+#define DMA_CH4_WAIT(len) UAIO_AWAIT(dma_ch4A, (void*)len)
 
 
 void
 dma_init();
 
 
+void
+dma_setup(struct dma_channel *channel, enum dma_direction direction,
+        void *source, void *target);
+
+
 ASYNC
-dmaA(struct uaio_task *self, struct dma *state);
+dma_ch4A(struct uaio_task *self, int bytes);
 
 
 #endif  // DMA_H_
