@@ -26,12 +26,16 @@
 
 
 #define USART2_SENDBUFF_SIZE    1024
+#define USART2_RECVBUFF_SIZE    1024
 #define USART_SEND(u) UAIO_AWAIT(usart_sendA, u)
+#define USART_RECV(u) UAIO_AWAIT(usart_recvA, u)
 
 
 struct usart {
     char send[USART2_SENDBUFF_SIZE];
     int sendlen;
+    char recv[USART2_RECVBUFF_SIZE];
+    int recvlen;
     struct reg_usart *reg;
 };
 
@@ -50,6 +54,10 @@ usart_write(struct usart *u, const char *fmt, ...);
 
 ASYNC
 usart_sendA(struct uaio_task *self, struct usart *u);
+
+
+ASYNC
+usart_recvA(struct uaio_task *self, struct usart *u);
 
 
 #endif  // UART_H_

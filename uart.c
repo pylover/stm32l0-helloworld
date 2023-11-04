@@ -24,6 +24,9 @@
 #include "dma.h"
 
 
+static struct uaio_task *usart2 = NULL;
+
+
 /** USART initializer
   * baud = 2 X PCLK / USART2DIV
   * div = 2 X PCLK / baud
@@ -69,11 +72,16 @@ usart_init(struct usart *u) {
                 GPIO_OSPEEDR_OSPEED2_1);
 
         /* Select alternate function mode for PA2 and PA3 */
-        GPIOA->MODER |= GPIO_MODER_MODE2_1;
+        REG_MODIFY(GPIOA->MODER, GPIO_MODER_MODE2, GPIO_MODER_MODE2_1);
+        REG_MODIFY(GPIOA->MODER, GPIO_MODER_MODE3, GPIO_MODER_MODE3_1);
 
         /* Alternate function selection for PA2 */
         REG_MODIFY(GPIOA->AFRL, GPIO_AFRL_AFSEL2,
             GPIOA_AFRL_AFSEL2_AF4_USART2_TX);
+
+        /* Alternate function selection for PA3 */
+        REG_MODIFY(GPIOA->AFRL, GPIO_AFRL_AFSEL3,
+            GPIOA_AFRL_AFSEL3_AF4_USART2_RX);
     }
     else {
         return;
@@ -81,6 +89,7 @@ usart_init(struct usart *u) {
 
     /* Disable USART */
     u->sendlen = 0;
+    u->recvlen = 0;
     REG_CLEAR(reg->CR1, USART_CR1_UE);
 
     /* CR1 configuration */
@@ -103,12 +112,20 @@ usart_init(struct usart *u) {
     uint32_t baud_rate = 115200;
     reg->BRR = (uint32_t) system_clock / baud_rate;
 
-    // /* Interrupts */
-    // NVIC_EnableIRQ(USART2_IRQHandler);
-    // NVIC_SetPriority(USART2_IRQHandler, 1);
+    /* Interrupts */
+    REG_SET(u->reg->CR1, USART_CR1_CMIE);
+    REG_SET(u->reg->CR1, USART_CR1_RXNEIE);
+    NVIC_EnableIRQ(USART2_IRQn);
+    NVIC_SetPriority(USART2_IRQn, 1);
 
     /* Enable USART Transmitter */
     REG_SET(reg->CR1, USART_CR1_TE);
+    REG_SET(reg->CR1, USART_CR1_RE);
+
+    /* 7 bit char match */
+    REG_SET(u->reg->CR2, USART_CR2_ADDM7);
+    REG_CLEAR(u->reg->CR1, USART_CR1_RE);
+    REG_SET(u->reg->CR2, 13 << USART_CR2_ADD_Pos);
 
     /* Enable USART */
     REG_SET(reg->CR1, USART_CR1_UE);
@@ -153,11 +170,31 @@ usart_sendA(struct uaio_task *self, struct usart *u) {
 }
 
 
+void
+USART2_IRQHandler() {
+    char in;
+    struct usart *u = usart2->current->state;
+
+    if (REG_GET(USART2->ISR, USART_ISR_RXNE)) {
+        in = (char) USART2->RDR;
+        u->recv[u->recvlen++] = in;
+    }
+
+    if (REG_GET(USART2->ISR, USART_ISR_CMF)) {
+        REG_SET(USART2->ICR, USART_ICR_CMCF);
+        usart2->status = UAIO_RUNNING;
+    }
+}
+
+
 ASYNC
 usart_recvA(struct uaio_task *self, struct usart *u) {
     CORO_START;
 
     DEBUG("Receiving ...");
-
+    u->recvlen = 0;
+    usart2 = self;
+    UAIO_IWAIT(u->reg->CR1 |= USART_CR1_RE);
+    REG_CLEAR(u->reg->CR1, USART_CR1_RE);
     CORO_FINALLY;
 }
