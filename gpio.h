@@ -20,16 +20,16 @@
 #define GPIO_H_
 
 
-#define GPIO_SET_OUTPUT(port, num) \
+#define GPIO_MODE_OUTPUT(port, num) \
     (port)->MODER &= ~(3 << ((num) * 2)); \
     (port)->MODER |= (1 << ((num) * 2))
 
 
-#define GPIO_SET_OPENDRAIN(port, num) \
+#define GPIO_OTYPE_OPENDRAIN(port, num) \
     (port)->OTYPER |= (1 << (num))
 
 
-#define GPIO_SET_LOWSPEED(port, num) \
+#define GPIO_SPEED_LOW(port, num) \
     (port)->OSPEEDR &= ~(3 << ((num) * 2));
 
 

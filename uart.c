@@ -65,13 +65,11 @@ usart_init(struct usart *u) {
         GPIOA->OTYPER &= ~GPIO_OTYPER_OT_2;
 
         /* High speed mode for PA2 */
-        GPIOA->OSPEEDR &= ~GPIO_OSPEEDR_OSPEED2;
+        REG_MODIFY(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED2,
+                GPIO_OSPEEDR_OSPEED2_1);
 
         /* Select alternate function mode for PA2 and PA3 */
         GPIOA->MODER |= GPIO_MODER_MODE2_1;
-
-        /* Select speed for PA2 */
-        GPIOA->OSPEEDR |= GPIO_OSPEEDR_OSPEED2_1;
 
         /* Alternate function selection for PA2 */
         REG_MODIFY(GPIOA->AFRL, GPIO_AFRL_AFSEL2,
