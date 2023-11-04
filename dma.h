@@ -38,7 +38,7 @@ dma_init();
 
 
 void
-dma_setup(struct dma_channel *channel, enum dma_direction direction,
+dma_setup(struct reg_dma_channel *channel, enum dma_direction direction,
         void *source, void *target);
 
 

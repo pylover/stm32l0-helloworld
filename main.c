@@ -33,6 +33,9 @@
 #include "lwjson/lwjson.h"
 
 
+static struct usart usart2 = {.reg = USART2};
+
+
 /* Uncomment for JSON example */
 // static lwjson_token_t tokens[128];
 // static lwjson_t lwjson;
@@ -71,6 +74,9 @@ startA(struct uaio_task *self) {
     rtc_autowakup_init();
     INFO("Starting...");
 
+    DEBUG("Init USART2");
+    usart_init(&usart2);
+
     while (1) {
         // /* JSON example */
         // json_example();
@@ -93,10 +99,10 @@ startA(struct uaio_task *self) {
         // UAIO_AWAIT(usart2_recvA, &usart2);
 
         /* USART send using DMA */
-        usart2_write("Hello");
-        usart2_write(", Packet: %d\r\n", c++);
-        USART2_SEND();
-        // USART2_RECV();
+        usart_write(&usart2, "Hello");
+        usart_write(&usart2, ", Packet: %d\r\n", c++);
+        USART_SEND(&usart2);
+        // USART_RECV(&usart2);
 
         // /* device_standby commented for now to test uart dma */
         // device_standby();
@@ -120,6 +126,6 @@ main(void) {
 
     status = UAIO_FOREVER(startA, NULL, 3);
 
-    device_deinit();
+    usart_deinit(&usart2);
     return status;
 }

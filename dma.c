@@ -43,7 +43,7 @@ dma_init() {
 
 
 void
-dma_setup(struct dma_channel *ch, enum dma_direction direction,
+dma_setup(struct reg_dma_channel *ch, enum dma_direction direction,
         void *source, void *target) {
     /* Disable DMA */
     CLEAR_BIT(ch->CCR, DMA_CCR_EN);

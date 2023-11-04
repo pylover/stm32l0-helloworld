@@ -195,7 +195,7 @@ typedef struct
   * @brief DMA Controller
   */
 
-typedef struct dma_channel
+typedef struct reg_dma_channel
 {
   __IO uint32_t CCR;          /*!< DMA channel x configuration register */
   __IO uint32_t CNDTR;        /*!< DMA channel x number of data register */
@@ -476,7 +476,7 @@ typedef struct
 /**
   * @brief Universal Synchronous Asynchronous Receiver Transmitter
   */
-typedef struct
+typedef struct reg_usart
 {
   __IO uint32_t CR1;    /*!< USART Control register 1,                 Address offset: 0x00 */
   __IO uint32_t CR2;    /*!< USART Control register 2,                 Address offset: 0x04 */

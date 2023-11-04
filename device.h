@@ -25,10 +25,6 @@ device_init();
 
 
 void
-device_deinit();
-
-
-void
 device_standby();
 
 

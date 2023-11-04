@@ -43,12 +43,6 @@ extern void initialise_monitor_handles(void);
 #endif
 
 
-void
-device_deinit() {
-    usart2_deinit();
-}
-
-
 ASYNC
 device_init(struct uaio_task *self) {
     CORO_START;
@@ -64,9 +58,6 @@ device_init(struct uaio_task *self) {
 
     DEBUG("Init DMA");
     dma_init();
-
-    DEBUG("Init USART2");
-    usart2_init();
 
     CORO_FINALLY;
 }
