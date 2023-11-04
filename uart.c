@@ -24,7 +24,7 @@
 #include "dma.h"
 
 
-/** USART2 initializer
+/** USART initializer
   * baud = 2 X PCLK / USART2DIV
   * div = 2 X PCLK / baud
   */
@@ -47,6 +47,8 @@ usart_init(struct usart *u) {
         /* Enable clock for USART2 */
         RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
 
+        /* TODO: USART2 clock enable during Sleep mode bit */
+        // RCC->CCIPR |=
         /* Clock configuration register (RCC_CCIPR)
         USART2SEL: USART2 clock source selection bits
         This bit is set and cleared by software.
@@ -55,9 +57,7 @@ usart_init(struct usart *u) {
         10: HSI16 clock selected as USART2 clock
         11: LSE clock selected as USART2 clock
         */
-        // RCC->CCIPR |=
 
-        /* TODO: USART2 clock enable during Sleep mode bit */
         /* RCC_APB1SMENR: Bit 17 USART2SMEN */
         GPIOA->MODER &= ~GPIO_MODER_MODE2;
 
@@ -74,16 +74,16 @@ usart_init(struct usart *u) {
         GPIOA->OSPEEDR |= GPIO_OSPEEDR_OSPEED2_1;
 
         /* Alternate function selection for PA2 */
-        GPIOA->AFRL &= ~GPIO_AFRL_AFSEL2_Msk;
-        GPIOA->AFRL |= GPIOA_AFRL_AFSEL2_AF4_USART2_TX;
+        REG_MODIFY(GPIOA->AFRL, GPIO_AFRL_AFSEL2,
+            GPIOA_AFRL_AFSEL2_AF4_USART2_TX);
     }
     else {
         return;
     }
 
-    /* Disable USART2 */
+    /* Disable USART */
     u->sendlen = 0;
-    CLEAR_BIT(reg->CR1, USART_CR1_UE);
+    REG_CLEAR(reg->CR1, USART_CR1_UE);
 
     /* CR1 configuration */
     /* Word length: 00: 1 Start bit, 8 data bits, n stop bits */
@@ -105,18 +105,22 @@ usart_init(struct usart *u) {
     uint32_t baud_rate = 115200;
     reg->BRR = (uint32_t) system_clock / baud_rate;
 
-    /* Enable USART2 Transmitter */
-    SET_BIT(reg->CR1, USART_CR1_TE);
+    // /* Interrupts */
+    // NVIC_EnableIRQ(USART2_IRQHandler);
+    // NVIC_SetPriority(USART2_IRQHandler, 1);
 
-    /* Enable USART2 */
-    SET_BIT(reg->CR1, USART_CR1_UE);
+    /* Enable USART Transmitter */
+    REG_SET(reg->CR1, USART_CR1_TE);
+
+    /* Enable USART */
+    REG_SET(reg->CR1, USART_CR1_UE);
 }
 
 
 void
 usart_deinit(struct usart *u) {
     /* Disable usart */
-    CLEAR_BIT(u->reg->CR1, USART_CR1_UE);
+    REG_CLEAR(u->reg->CR1, USART_CR1_UE);
 }
 
 
@@ -137,14 +141,14 @@ usart_sendA(struct uaio_task *self, struct usart *u) {
 
     DEBUGN("Sending: %.*s", u->sendlen, u->send);
 
-    /* Enable USART2 DMA request */
-    SET_BIT(u->reg->CR3, USART_CR3_DMAT);
+    /* Enable USART DMA request */
+    REG_SET(u->reg->CR3, USART_CR3_DMAT);
 
     DMA_CH4_WAIT((void*)u->sendlen);
     // DEBUG("Transfer completed");
 
-    /* Disable USART2 DMA request */
-    CLEAR_BIT(u->reg->CR3, USART_CR3_DMAT);
+    /* Disable USART DMA request */
+    REG_CLEAR(u->reg->CR3, USART_CR3_DMAT);
     u->sendlen = 0;
 
     CORO_FINALLY;
@@ -155,7 +159,6 @@ ASYNC
 usart_recvA(struct uaio_task *self, struct usart *u) {
     CORO_START;
 
-    // USART2_IRQHandler
     DEBUG("Receiving ...");
 
     CORO_FINALLY;

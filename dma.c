@@ -46,7 +46,7 @@ void
 dma_setup(struct reg_dma_channel *ch, enum dma_direction direction,
         void *source, void *target) {
     /* Disable DMA */
-    CLEAR_BIT(ch->CCR, DMA_CCR_EN);
+    REG_CLEAR(ch->CCR, DMA_CCR_EN);
 
     /* Configure the channel priority to medium level */
     /*
@@ -71,42 +71,42 @@ dma_setup(struct reg_dma_channel *ch, enum dma_direction direction,
     1: enabled
     */
     if (direction == DMA_MEM2MEM) {
-        SET_BIT(ch->CCR, DMA_CCR_MEM2MEM);
+        REG_SET(ch->CCR, DMA_CCR_MEM2MEM);
 
         /* Enable memory address incrementation by one in both sides */
-        SET_BIT(ch->CCR, DMA_CCR_MINC);
-        SET_BIT(ch->CCR, DMA_CCR_PINC);
+        REG_SET(ch->CCR, DMA_CCR_MINC);
+        REG_SET(ch->CCR, DMA_CCR_PINC);
 
         /* Disable circular mode */
-        CLEAR_BIT(ch->CCR, DMA_CCR_CIRC);
+        REG_CLEAR(ch->CCR, DMA_CCR_CIRC);
 
-        CLEAR_BIT(ch->CCR, DMA_CCR_DIR);
+        REG_CLEAR(ch->CCR, DMA_CCR_DIR);
         ch->CPAR = (uint32_t)source;
         ch->CMAR = (uint32_t)target;
     }
     else {
-        CLEAR_BIT(ch->CCR, DMA_CCR_MEM2MEM);
+        REG_CLEAR(ch->CCR, DMA_CCR_MEM2MEM);
         if (direction == DMA_MEM2PERI) {
-            SET_BIT(ch->CCR, DMA_CCR_DIR);
+            REG_SET(ch->CCR, DMA_CCR_DIR);
             ch->CPAR = (uint32_t)target;
             ch->CMAR = (uint32_t)source;
         }
         else {
-            CLEAR_BIT(ch->CCR, DMA_CCR_DIR);
+            REG_CLEAR(ch->CCR, DMA_CCR_DIR);
             ch->CPAR = (uint32_t)source;
             ch->CMAR = (uint32_t)target;
         }
 
         /* Set memory address incement by one byte */
-        SET_BIT(ch->CCR, DMA_CCR_MINC);
+        REG_SET(ch->CCR, DMA_CCR_MINC);
 
         /* Disable address incrementation on peripheral address */
-        CLEAR_BIT(ch->CCR, DMA_CCR_PINC);
+        REG_CLEAR(ch->CCR, DMA_CCR_PINC);
 
         // /* Disable circular mode */
-        // CLEAR_BIT(ch->CCR, DMA_CCR_CIRC);
+        // REG_CLEAR(ch->CCR, DMA_CCR_CIRC);
         /* Enable circular mode */
-        SET_BIT(ch->CCR, DMA_CCR_CIRC);
+        REG_SET(ch->CCR, DMA_CCR_CIRC);
     }
 
     /* Set the memory and pripheral write chunk size to one byte */
@@ -120,8 +120,8 @@ dma_setup(struct reg_dma_channel *ch, enum dma_direction direction,
     ch->CCR &= ~(DMA_CCR_PSIZE_1 | DMA_CCR_PSIZE_0);
 
     /* Enable interrpt after full transfer */
-    SET_BIT(ch->CCR, DMA_CCR_TCIE | DMA_CCR_TEIE);
-    CLEAR_BIT(ch->CCR, DMA_CCR_HTIE);
+    REG_SET(ch->CCR, DMA_CCR_TCIE | DMA_CCR_TEIE);
+    REG_CLEAR(ch->CCR, DMA_CCR_HTIE);
 }
 
 
@@ -129,22 +129,22 @@ void
 DMA1_Channel4_7_IRQHandler() {
     // if (DMA1->ISR & DMA_ISR_HTIF4) {
     //     INFO("Half transfer");
-    //     SET_BIT(DMA1->IFCR, DMA_IFCR_CHTIF4);
+    //     REG_SET(DMA1->IFCR, DMA_IFCR_CHTIF4);
     // }
 
     /* transfer error */
     if (DMA1->ISR & DMA_ISR_TEIF4) {
-        SET_BIT(DMA1->IFCR, DMA_IFCR_CTEIF4);
+        REG_SET(DMA1->IFCR, DMA_IFCR_CTEIF4);
         DEBUG("DMA ERROR");
     }
 
     /* Full transfer */
     if (DMA1->ISR & DMA_ISR_TCIF4) {
         /* Clear DMA interrupt flags */
-        SET_BIT(DMA1->IFCR, DMA_IFCR_CTCIF4);
+        REG_SET(DMA1->IFCR, DMA_IFCR_CTCIF4);
 
         /* Disable DMA */
-        CLEAR_BIT(DMA1_CH4->CCR, DMA_CCR_EN);
+        REG_CLEAR(DMA1_CH4->CCR, DMA_CCR_EN);
 
         channel4->status = UAIO_RUNNING;
     }
@@ -156,7 +156,7 @@ dma_ch4A(struct uaio_task *self, int bytes) {
     CORO_START;
 
     channel4 = self;
-    SET_BIT(DMA1->IFCR, DMA_IFCR_CTCIF4 | DMA_IFCR_CTEIF4);
+    REG_SET(DMA1->IFCR, DMA_IFCR_CTCIF4 | DMA_IFCR_CTEIF4);
 
     /* Set size of data to be sent */
     DMA1_CH4->CNDTR = bytes;
