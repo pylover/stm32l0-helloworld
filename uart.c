@@ -160,7 +160,6 @@ usart_sendA(struct uaio_task *self, struct usart *u) {
     REG_SET(u->reg->CR3, USART_CR3_DMAT);
 
     DMA_CH4_WAIT((void*)u->sendlen);
-    // DEBUG("Transfer completed");
 
     /* Disable USART DMA request */
     REG_CLEAR(u->reg->CR3, USART_CR3_DMAT);
@@ -191,7 +190,6 @@ ASYNC
 usart_recvA(struct uaio_task *self, struct usart *u) {
     CORO_START;
 
-    DEBUG("Receiving ...");
     u->recvlen = 0;
     usart2 = self;
     UAIO_IWAIT(u->reg->CR1 |= USART_CR1_RE);

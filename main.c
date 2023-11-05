@@ -74,7 +74,7 @@ startA(struct uaio_task *self) {
     rtc_autowakup_init();
     INFO("Starting...");
 
-    DEBUG("Init USART2");
+    INFO("Init USART2");
     usart_init(&usart2);
 
     while (1) {
@@ -102,6 +102,7 @@ startA(struct uaio_task *self) {
         usart_write(&usart2, "Hello");
         usart_write(&usart2, ", Packet: %d\r\n", c++);
         USART_SEND(&usart2);
+        DEBUG("Receiving ...");
         USART_RECV(&usart2);
         DEBUG("recv: %.*s", usart2.recvlen, usart2.recv);
 
