@@ -3,6 +3,7 @@
 - Crypto
 - Remove debug symbols (production build), No logs
 - Flash and eeprom protection.
+- EDRX
 
 
 ## Backlog
