@@ -2,7 +2,7 @@
 
 This project is configured for target device: `STM32L071CZT6`. Use 
 `STMCubeIDE` to generate startup assembly: `stm32l0xxx.s` and flash linker 
-script: `tm32l0xxx_flash.ld` for other devices.
+script: `stm32l0xxx_flash.ld` for other devices.
 
 ### Preparation
 
