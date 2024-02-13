@@ -9,7 +9,7 @@ script: `stm32l0xxx_flash.ld` for other devices.
 ```bash
 sudo apt-get install \
   libncurses-dev \
-  libusb-dev \
+  libusb-1.0-0-dev \
   libncursesw5 \
   openocd
 ```
